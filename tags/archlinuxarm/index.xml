@@ -1,1 +1,226 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>archlinuxarm on blog</title><link>/tags/archlinuxarm/</link><description>Recent content in archlinuxarm on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Wed, 10 Feb 2021 20:00:00 +0900</lastBuildDate><atom:link href="/tags/archlinuxarm/index.xml" rel="self" type="application/rss+xml"/><item><title>k8s Cluster on Raspberry Pi</title><link>/posts/k8s-cluster-on-raspberry-pi/</link><pubDate>Wed, 10 Feb 2021 20:00:00 +0900</pubDate><guid>/posts/k8s-cluster-on-raspberry-pi/</guid><description>kei-s16/k8s-arch-rpi-cluster.md を元に加筆・修正を行ったものです 基本的に2021年頭の情報になっており、すでに時代遅れであったり、間違いに気づいて実際の運用では改善済のものが記事には含まれています なにやったのか？ rpi4 * 3 で k8s クラスタを作る 構成 rpi 4 (4GB) Arch Linux (ARM) 作業環境 Raspbianイメージ焼くところ Windowsの世界 もろもろの雑用 Arch on WSL2 kei@Win-Desktop-wsl OS: Arch Linux on Windows 10 x86_64 Kernel: 5.4.72-microsoft-standard-WSL2 Shell: zsh 5.8 CPU: AMD Ryzen 7 3800X (16) @ 3.892GHz Memory: 279MiB / 12733MiB ArchLinux for ARM64がんばるところ Raspbian(32bit) Kubernet</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>archlinuxarm on blog</title><link>/tags/archlinuxarm/</link><description>Recent content in archlinuxarm on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Wed, 10 Feb 2021 20:00:00 +0900</lastBuildDate><atom:link href="/tags/archlinuxarm/index.xml" rel="self" type="application/rss+xml"/><item><title>k8s Cluster on Raspberry Pi</title><link>/posts/k8s-cluster-on-raspberry-pi/</link><pubDate>Wed, 10 Feb 2021 20:00:00 +0900</pubDate><guid>/posts/k8s-cluster-on-raspberry-pi/</guid><description>kei-s16/k8s-arch-rpi-cluster.md を元に加筆・修正を行ったものです 基本的に2021年頭の情報になっており、すでに時代遅れであったり、間違いに気づいて実際の運用では改善済のものが記事には含まれています なにやったのか？ rpi4 * 3 で k8s クラスタを作る 構成 rpi 4 (4GB) Arch Linux (ARM) 作業環境 Raspbianイメージ焼くところ Windowsの世界 もろもろの雑用 Arch on WSL2 kei@Win-Desktop-wsl OS: Arch Linux on Windows 10 x86_64 Kernel: 5.4.72-microsoft-standard-WSL2 Shell: zsh 5.8 CPU: AMD Ryzen 7 3800X (16) @ 3.892GHz Memory: 279MiB / 12733MiB ArchLinux for ARM64がんばるところ Raspbian(32bit) Kubernet</description><content>&lt;p>&lt;a href="https://gist.github.com/kei-s16/91cc87b127f38cfed28fe625ae8c9ba9">kei-s16/k8s-arch-rpi-cluster.md&lt;/a> を元に加筆・修正を行ったものです&lt;br>
+基本的に2021年頭の情報になっており、すでに時代遅れであったり、間違いに気づいて実際の運用では改善済のものが記事には含まれています&lt;/p>
+&lt;hr>
+&lt;h2 id="なにやったのか">なにやったのか？&lt;/h2>
+&lt;p>rpi4 * 3 で k8s クラスタを作る&lt;/p>
+&lt;h2 id="構成">構成&lt;/h2>
+&lt;ul>
+&lt;li>rpi 4 (4GB)
+&lt;ul>
+&lt;li>Arch Linux (ARM)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="作業環境">作業環境&lt;/h2>
+&lt;h3 id="raspbianイメージ焼くところ">Raspbianイメージ焼くところ&lt;/h3>
+&lt;p>Windowsの世界&lt;/p>
+&lt;h3 id="もろもろの雑用">もろもろの雑用&lt;/h3>
+&lt;p>Arch on WSL2&lt;/p>
+&lt;pre tabindex="0">&lt;code>kei@Win-Desktop-wsl
+OS: Arch Linux on Windows 10 x86_64
+Kernel: 5.4.72-microsoft-standard-WSL2
+Shell: zsh 5.8
+CPU: AMD Ryzen 7 3800X (16) @ 3.892GHz
+Memory: 279MiB / 12733MiB
+&lt;/code>&lt;/pre>&lt;h3 id="archlinux-for-arm64がんばるところ">ArchLinux for ARM64がんばるところ&lt;/h3>
+&lt;p>Raspbian(32bit)&lt;/p>
+&lt;h3 id="kubernetesがんばるところ">Kubernetesがんばるところ&lt;/h3>
+&lt;p>ArchLinux ARM(64bit) on Raspberry Pi&lt;/p>
+&lt;h2 id="作業手順">作業手順&lt;/h2>
+&lt;h3 id="下準備フェイズ">下準備フェイズ&lt;/h3>
+&lt;ol>
+&lt;li>組み立てやってテンション上げる&lt;/li>
+&lt;li>メインのLANにぶらさげるLANのセットアップ&lt;/li>
+&lt;li>Raspbian を headlessでインストール
+&lt;ol>
+&lt;li>ルータに有線で接続してssh
+&lt;ol>
+&lt;li>新ユーザ作ってpiユーザ消す&lt;/li>
+&lt;li>パスワード→鍵認証はやらない(raspbianをこのあと使わないので)&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Raspbian 上 で ArchLinux ARM を焼く&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">&lt;span style="color:#75715e"># $はすべて sudo&lt;/span>
+$ fdisk /dev/sda
+&lt;span style="color:#75715e"># いいかんじにパーティション切る&lt;/span>
+$ mkfs.vfat /dev/sda1
+$ mkdir boot
+$ mount /dev/sda1 boot
+$ mkfs.ext4 /dev/sda2
+$ mkdir root
+$ mount /dev/sda2 root
+&lt;span style="color:#75715e"># イメージ落とす&lt;/span>
+$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
+&lt;span style="color:#75715e"># ここから先はsuする&lt;/span>
+$ su
+% bsdtar -xpf ArchLinuxARM-rpi-4-latest.tar.gz -C root
+% sync
+&lt;span style="color:#75715e"># 64bit かつ rpi4 なので&lt;/span>
+% sed -i &lt;span style="color:#e6db74">&amp;#39;s/mmcblk0/mmcblk1/g&amp;#39;&lt;/span> root/etc/fstab
+% mv root/boot/* boot
+&lt;span style="color:#75715e"># マウントしたらちゃんとアンマウントしようね&lt;/span>
+% umount boot root
+&lt;span style="color:#75715e"># これを3セット (さらに別用途で+1セットやったのは秘密)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="本作業フェイズ">本作業フェイズ&lt;/h3>
+&lt;h4 id="各マシンにホスト名ふったりユーザ作ったり">各マシンにホスト名ふったりユーザ作ったり&lt;/h4>
+&lt;ul>
+&lt;li>&lt;code>pacman -Syyu&lt;/code> めっちゃ重い(国内ミラーなさそう)&lt;/li>
+&lt;li>&lt;code>pacman -S sudo&lt;/code>&lt;/li>
+&lt;li>ホスト名変えた
+&lt;ul>
+&lt;li>kisaragi&lt;/li>
+&lt;li>mogami&lt;/li>
+&lt;li>kumano&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>sudoersいじった&lt;/li>
+&lt;li>公開鍵認証以外封じた&lt;/li>
+&lt;/ul>
+&lt;h4 id="kubernetesまわりガーっとインストール">Kubernetesまわりガーっとインストール&lt;/h4>
+&lt;ul>
+&lt;li>Ansibleでやろうとしたが、pacmanだけでなくyayも使うのでちょっと厳しかった
+&lt;ul>
+&lt;li>ので横着してシェルスクリプト書いたが横着しすぎてコケた
+&lt;ul>
+&lt;li>ので最終的に半手作業……&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">&lt;span style="color:#75715e">#!/bin/bash -eu
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>pacman -S git base base-devel --noconfirm
+mkdir ~/build/
+cd ~/build
+git clone https://aur.archlinux.org/yay.git
+cd ~/build/yay
+makepkg -si --noconfirm
+cd ~/
+yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntrack-tools cni-plugins --noconfirm
+&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="kubernetesセットアップ">Kubernetesセットアップ&lt;/h4>
+&lt;h5 id="全体構成">全体構成&lt;/h5>
+&lt;ul>
+&lt;li>kisaragi : Master&lt;/li>
+&lt;li>mogami : node&lt;/li>
+&lt;li>kumano : node&lt;/li>
+&lt;/ul>
+&lt;p>お船じゃないよ&lt;/p>
+&lt;h5 id="kisaragiのセットアップ前半戦">kisaragiのセットアップ前半戦&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo kubeadm init --pod-network-cidr&lt;span style="color:#f92672">=&lt;/span>10.244.0.0/16
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown &lt;span style="color:#66d9ef">$(&lt;/span>id -u&lt;span style="color:#66d9ef">)&lt;/span>:&lt;span style="color:#66d9ef">$(&lt;/span>id -g&lt;span style="color:#66d9ef">)&lt;/span> $HOME/.kube/config
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="mogami--kumanoのセットアップ">mogami &amp;amp; kumanoのセットアップ&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo systemctl enable kubelet.service
+sudo systemctl start kubelete.service
+sudo kubeadm join &lt;span style="color:#f92672">{&lt;/span>いろんなひみつのオプション&lt;span style="color:#f92672">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="kisaragiのセットアップ後半戦">kisaragiのセットアップ後半戦&lt;/h5>
+&lt;p>クラスターにノードを参加させる&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">kubectl label node mogami node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
+kubectl label node kumano node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">kisaragi% kubectl version
+Client Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:28:09Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}&lt;/span>
+Server Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:20:00Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}}}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="なんかpod動かしてみる">なんかpod動かしてみる&lt;/h4>
+&lt;p>オレオレDocker Registry置くことにした&lt;/p>
+&lt;p>deployment.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yml" data-lang="yml">---
+&lt;span style="color:#f92672">apiVersion&lt;/span>: &lt;span style="color:#ae81ff">apps/v1&lt;/span>
+&lt;span style="color:#f92672">kind&lt;/span>: &lt;span style="color:#ae81ff">Deployment&lt;/span>
+&lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;span style="color:#f92672">labels&lt;/span>:
+&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;span style="color:#f92672">spec&lt;/span>:
+&lt;span style="color:#f92672">replicas&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>
+&lt;span style="color:#f92672">selector&lt;/span>:
+&lt;span style="color:#f92672">matchLabels&lt;/span>:
+&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;span style="color:#f92672">template&lt;/span>:
+&lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;span style="color:#f92672">labels&lt;/span>:
+&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;span style="color:#f92672">spec&lt;/span>:
+&lt;span style="color:#f92672">hostNetwork&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;span style="color:#f92672">tolerations&lt;/span>:
+- &lt;span style="color:#f92672">key&lt;/span>: &lt;span style="color:#ae81ff">node-role.kubernetes.io/master&lt;/span>
+&lt;span style="color:#f92672">effect&lt;/span>: &lt;span style="color:#ae81ff">NoSchedule&lt;/span>
+&lt;span style="color:#f92672">nodeSelector&lt;/span>:
+&lt;span style="color:#f92672">kubernetes.io/hostname&lt;/span>: &lt;span style="color:#ae81ff">kisaragi&lt;/span>
+&lt;span style="color:#f92672">containers&lt;/span>:
+- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">registry:2.7.1&lt;/span>
+&lt;span style="color:#f92672">ports&lt;/span>:
+- &lt;span style="color:#f92672">containerPort&lt;/span>: &lt;span style="color:#ae81ff">5000&lt;/span>
+&lt;span style="color:#f92672">volumeMounts&lt;/span>:
+- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
+&lt;span style="color:#f92672">mountPath&lt;/span>: &lt;span style="color:#ae81ff">/var/lib/registry&lt;/span>
+&lt;span style="color:#f92672">volumes&lt;/span>:
+- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
+&lt;span style="color:#f92672">hostPath&lt;/span>:
+&lt;span style="color:#f92672">type&lt;/span>: &lt;span style="color:#ae81ff">Directory&lt;/span>
+&lt;span style="color:#f92672">path&lt;/span>: &lt;span style="color:#ae81ff">/mnt/exthdd/registry&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>これをデプロイして、外からpull &amp;amp; pushしてみる&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo docker pull hello-world
+sudo docker tag hello-world kisaragi.local:5000/hello-world
+sudo docker push kisaragi.local:5000/hello-world
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>動いた！&lt;/strong>&lt;/p>
+&lt;h2 id="その他もろもろ">その他もろもろ&lt;/h2>
+&lt;h3 id="つらかったこと">つらかったこと&lt;/h3>
+&lt;ul>
+&lt;li>アップデートで再起動かけたら &lt;code>kubectl&lt;/code> コケた
+&lt;ul>
+&lt;li>masterで &lt;code>systemctl enable kubelet&lt;/code> 忘れてた&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>一瞬世界から孤立したサーバを産み落としてしまった
+&lt;ul>
+&lt;li>&lt;code>~/.ssh/authorized_keys&lt;/code> を消してしまった&lt;/li>
+&lt;li>別マシンでSDカードをマウントして &lt;code>authorized_keys&lt;/code> を作ることでごまかした
+&lt;ul>
+&lt;li>&lt;code>chmod {ユーザ名}:sudo authorized_keys&lt;/code> 忘れずにね&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="やらなかったこと今後やりたいこと">やらなかったこと(今後やりたいこと)&lt;/h3>
+&lt;ul>
+&lt;li>PoE(USBケーブル邪魔じゃね？)&lt;/li>
+&lt;li>ノード台数の拡張&lt;/li>
+&lt;li>無線LANルータがちょっと残念だったので改善
+&lt;ul>
+&lt;li>ラズパイルータにしちゃう&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="結論">結論&lt;/h2>
+&lt;ul>
+&lt;li>ArchLinuxはいいぞ&lt;/li>
+&lt;li>k8sはいいぞ&lt;/li>
+&lt;li>横着はよくないぞ&lt;/li>
+&lt;/ul>
+&lt;h2 id="参考記事">参考記事&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4">Raspberry Pi 4 | ArchLinux ARM&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://qiita.com/tomotomo/items/2ff445377c13f9db38e2">Raspberry Pi 4 のMACアドレスの範囲が変わったぞ&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://developers.cyberagent.co.jp/blog/archives/14721/">3日間クッキング【Kubernetes のラズペリーパイ包み　“サイバーエージェント風】&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://qiita.com/go_vargo/items/d1271ab60f2bba375dcc">Raspberry PiでおうちKubernetes構築【物理編】&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://qiita.com/go_vargo/items/29f6d832ea0a289b4778">Raspberry PiでおうちKubernetes構築【論理編】&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://qiita.com/temeteke/items/04960c96edee113bd053">Raspberry Pi 4とArch Linux(64bit)で作るKubernetesクラスタ)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://sminamot-dev.hatenablog.com/entry/2020/01/26/111949">Raspberry Pi 4 でおうちk8sクラスタを構築する&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://qiita.com/yuyakato/items/c5b1b1293c5879e231ab">おうちk8sクラスタを作る: Dockerレジストリ編&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="補足">補足&lt;/h2>
+&lt;p>重要なものだけ補足&lt;/p>
+&lt;blockquote>
+&lt;p>pacman -Syyu めっちゃ重い(国内ミラーなさそう)&lt;/p>
+&lt;/blockquote>
+&lt;p>という記述がありましたが、2021/11/18にAsahi Linuxが国内ミラーを作成してくれました！&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="en" dir="ltr">We noticed that there was no Arch Linux ARM mirror in Japan, so we&amp;#39;re sponsoring one now 😊&lt;br>&lt;br>If you&amp;#39;re in Japan or nearby, feel free to point your pacman.d/mirrorlist at &lt;a href="https://t.co/GM69rZE3tC">https://t.co/GM69rZE3tC&lt;/a>!&lt;a href="https://t.co/erKHtHwFfX">https://t.co/erKHtHwFfX&lt;/a> &lt;a href="https://t.co/m0opnupc5i">pic.twitter.com/m0opnupc5i&lt;/a>&lt;/p>&amp;mdash; Asahi Linux (@AsahiLinux) &lt;a href="https://twitter.com/AsahiLinux/status/1461268746878656513?ref_src=twsrc%5Etfw">November 18, 2021&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script></content></item></channel></rss>
