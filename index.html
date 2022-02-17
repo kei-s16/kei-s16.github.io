@@ -96,6 +96,28 @@ tl;dr archlinuxarmベースなk8sクラスタをRaspberry Pi * 4で作った時�
 <a class="read-more button" href=/posts/k8s-cluster-on-raspberry-pi/>read more →</a>
 </div>
 </div>
+<div class="post on-list">
+<h1 class=post-title>
+<a href=/posts/use-systemd-timer-instead-of-crond/>systemctl timer unitを使ってcronを置き換えたときのメモ</a>
+</h1>
+<div class=post-meta>
+<span class=post-date>
+2020-06-17
+</span>
+<span class=post-author>:: kei</span>
+</div>
+<span class=post-tags>
+#<a href=/tags/linux/>linux</a>&nbsp;
+#<a href=/tags/systemd/>systemd</a>&nbsp;
+#<a href=/tags/%E3%83%A1%E3%83%A2/>メモ</a>&nbsp;
+</span>
+<div class=post-content>
+移植 : <a href=https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0>https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0</a> 概略 systemdのユニットを定期的に再起動するために 再起動用のサービスユニット 上記ユニットのタイマーユニット を作成し、ついでに実行時にwebhookを使ってDiscordに通知を飛ばす 前提とかおことわりとか Indigo(6vCPU, 8GB)上のUbuntu 18.04で動かしています。 今回定期的に再起動したいサービスユニットは、ARKのプライベートサーバ 上記のサービスユニットをこの記事では(wikiと同じく)ar
+</div>
+<div>
+<a class="read-more button" href=/posts/use-systemd-timer-instead-of-crond/>read more →</a>
+</div>
+</div>
 <div class=pagination>
 <div class=pagination__buttons>
 </div>

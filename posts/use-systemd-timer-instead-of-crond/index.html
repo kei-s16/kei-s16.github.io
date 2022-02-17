@@ -1,0 +1,161 @@
+<!doctype html><html lang=ja>
+<head>
+<title>systemctl timer unitを使ってcronを置き換えたときのメモ :: blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="移植 : https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0 概略 systemdのユニットを定期的に再起動するために 再起動用のサービスユニット 上記ユニットのタイマーユニット を作成し、ついでに実行時にwebhookを使ってDiscordに通知を飛ばす 前提とかおことわりとか Indigo(6vCPU, 8GB)上のUbuntu 18.04で動かしています。 今回定期的に再起動したいサービスユニットは、ARKのプライベートサーバ 上記のサービスユニットをこの記事では(wikiと同じく)ar">
+<meta name=keywords content>
+<meta name=robots content="noodp">
+<link rel=canonical href=/posts/use-systemd-timer-instead-of-crond/>
+<link rel=stylesheet href=/assets/style.css>
+<link rel=stylesheet href=/assets/blue.css>
+<link rel=apple-touch-icon href=/img/apple-touch-icon-192x192.png>
+<link rel="shortcut icon" href=/img/favicon/blue.png>
+<meta name=twitter:card content="summary">
+<meta name=twitter:site content>
+<meta name=twitter:creator content="_kei_s">
+<meta property="og:locale" content="ja">
+<meta property="og:type" content="article">
+<meta property="og:title" content="systemctl timer unitを使ってcronを置き換えたときのメモ">
+<meta property="og:description" content="移植 : https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0 概略 systemdのユニットを定期的に再起動するために 再起動用のサービスユニット 上記ユニットのタイマーユニット を作成し、ついでに実行時にwebhookを使ってDiscordに通知を飛ばす 前提とかおことわりとか Indigo(6vCPU, 8GB)上のUbuntu 18.04で動かしています。 今回定期的に再起動したいサービスユニットは、ARKのプライベートサーバ 上記のサービスユニットをこの記事では(wikiと同じく)ar">
+<meta property="og:url" content="/posts/use-systemd-timer-instead-of-crond/">
+<meta property="og:site_name" content="blog">
+<meta property="og:image" content="/">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+<meta property="article:section" content="技術">
+<meta property="article:published_time" content="2020-06-17 20:00:00 +0900 +0900">
+</head>
+<body class=blue>
+<div class="container center headings--one-size">
+<header class=header>
+<div class=header__inner>
+<div class=header__logo>
+<a href=/>
+<div class=logo>
+blog
+</div>
+</a>
+</div>
+<div class=menu-trigger>menu</div>
+</div>
+<nav class=menu>
+<ul class="menu__inner menu__inner--desktop">
+<li><a href=/tags>カテゴリ</a></li>
+<li><a href=/tags>タグ</a></li>
+<li><a href=/archives>月別アーカイブ</a></li>
+</ul>
+<ul class="menu__inner menu__inner--mobile">
+<li><a href=/tags>カテゴリ</a></li>
+<li><a href=/tags>タグ</a></li>
+<li><a href=/archives>月別アーカイブ</a></li>
+</ul>
+</nav>
+</header>
+<div class=content>
+<div class=post>
+<h1 class=post-title>
+<a href=/posts/use-systemd-timer-instead-of-crond/>systemctl timer unitを使ってcronを置き換えたときのメモ</a></h1>
+<div class=post-meta>
+<span class=post-date>
+2020-06-17
+</span>
+<span class=post-author>:: kei</span>
+</div>
+<span class=post-tags>
+#<a href=/tags/linux/>linux</a>&nbsp;
+#<a href=/tags/systemd/>systemd</a>&nbsp;
+#<a href=/tags/%E3%83%A1%E3%83%A2/>メモ</a>&nbsp;
+</span>
+<div class=post-content><div>
+<p>移植 : <a href=https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0>https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0</a></p>
+<hr>
+<h3 id=概略>概略<a href=#概略 class=hanchor arialabel=Anchor>&#8983;</a> </h3>
+<p>systemdのユニットを定期的に再起動するために</p>
+<ul>
+<li>再起動用のサービスユニット</li>
+<li>上記ユニットのタイマーユニット</li>
+</ul>
+<p>を作成し、ついでに実行時にwebhookを使ってDiscordに通知を飛ばす</p>
+<h3 id=前提とかおことわりとか>前提とかおことわりとか<a href=#前提とかおことわりとか class=hanchor arialabel=Anchor>&#8983;</a> </h3>
+<ul>
+<li>Indigo(6vCPU, 8GB)上のUbuntu 18.04で動かしています。</li>
+<li>今回定期的に再起動したいサービスユニットは、<a href=https://ark.gamepedia.com/Dedicated_Server_Setup>ARKのプライベートサーバ</a></li>
+<li>上記のサービスユニットをこの記事では(wikiと同じく)<code>ark-dedicated.service</code>という名前で登録しています。別名で登録している場合や別のユニットを対象とする場合は適宜読み替えてください。</li>
+<li>systemdまわりめちゃくちゃ浅い理解で書いてます。</li>
+<li>コケたときのことはなにも考えてません。</li>
+</ul>
+<h3 id=まずは定期的に再起動するように>まずは定期的に再起動するように<a href=#まずは定期的に再起動するように class=hanchor arialabel=Anchor>&#8983;</a> </h3>
+<h4 id=再起動用のサービスユニットを作る>再起動用のサービスユニットを作る<a href=#再起動用のサービスユニットを作る class=hanchor arialabel=Anchor>&#8983;</a> </h4>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-restart-ark-dedicated.service data-lang=restart-ark-dedicated.service><span style=color:#66d9ef>[Unit]</span>
+<span style=color:#a6e22e>Description</span><span style=color:#f92672>=</span><span style=color:#e6db74>Restart ark-dedicated.service</span>
+
+<span style=color:#66d9ef>[Service]</span>
+<span style=color:#a6e22e>Type</span><span style=color:#f92672>=</span><span style=color:#e6db74>oneshot</span>
+<span style=color:#a6e22e>ExecStart</span><span style=color:#f92672>=</span><span style=color:#e6db74>/bin/systemctl try-restart ark-dedicated.service</span>
+</code></pre></div><h4 id=タイマーユニットを作る>タイマーユニットを作る<a href=#タイマーユニットを作る class=hanchor arialabel=Anchor>&#8983;</a> </h4>
+<p>今回は誰も遊んでいないであろう毎週水曜日正午に再起動処理を実行することにします。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-restart-ark-dedicated.timer data-lang=restart-ark-dedicated.timer><span style=color:#66d9ef>[Unit]</span>
+<span style=color:#a6e22e>Description</span><span style=color:#f92672>=</span><span style=color:#e6db74>Restart ark-dedicated.service every wednesday</span>
+
+<span style=color:#66d9ef>[Timer]</span>
+<span style=color:#a6e22e>OnCalendar</span><span style=color:#f92672>=</span><span style=color:#e6db74>Wed 12:00</span>
+<span style=color:#a6e22e>Persistent</span><span style=color:#f92672>=</span><span style=color:#e6db74>True</span>
+
+<span style=color:#66d9ef>[Install]</span>
+<span style=color:#a6e22e>WantedBy</span><span style=color:#f92672>=</span><span style=color:#e6db74>timers.target</span>
+</code></pre></div><h3 id=webhookで通知する>webhookで通知する<a href=#webhookで通知する class=hanchor arialabel=Anchor>&#8983;</a> </h3>
+<p>いちいち再起動するよーとかしたよーとか言うのもめんどうなので。</p>
+<h4 id=まずは試してみる>まずは試してみる<a href=#まずは試してみる class=hanchor arialabel=Anchor>&#8983;</a> </h4>
+<p><code>通知をしたいDiscordサーバのサーバ設定→ウェブフック</code>からウェブフックを作り、webhook URLを取得します。</p>
+<p>とりあえず下記コマンドで雑にメッセージを投げてみる。</p>
+<pre tabindex=0><code>curl -X POST -H 'Content-Type: application/json' -d '{&quot;content&quot; : &quot;test&quot;}' webhookのurl
+</code></pre><h4 id=再起動の開始と終了に合わせて通知を飛ばす>再起動の開始と終了に合わせて通知を飛ばす<a href=#再起動の開始と終了に合わせて通知を飛ばす class=hanchor arialabel=Anchor>&#8983;</a> </h4>
+<p><code>restart-ark-dedicated.service</code>を再び編集し、<code>ExecStartPre</code>で<code>ExecStart</code>の実行前に、<code>ExecStartPost</code>で<code>ExecStart</code>の実行後に走らせるコマンドをそれぞれ指定します。</p>
+<pre tabindex=0><code class=language-restart-ark-dedicated.service(編集後) data-lang=restart-ark-dedicated.service(編集後)>[Unit]
+Description=Restart ark-dedicated.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/curl -X POST -H 'Content-Type: application/json' -d '{&quot;content&quot; : &quot;[定期]サーバ再起動開始&quot;}' webhookのurl
+ExecStart=/bin/systemctl try-restart ark-dedicated.service
+ExecStartPost=/usr/bin/curl -X POST -H 'Content-Type: application/json' -d '{&quot;content&quot; : &quot;[定期]サーバ再起動完了&quot;}' webhookのurl
+</code></pre><h3 id=おわりに>おわりに<a href=#おわりに class=hanchor arialabel=Anchor>&#8983;</a> </h3>
+<p>このままだと再起動開始通知から速攻で再起動処理が動くのであんまりよくない。
+人に優しくありたいなら30分とか1時間前に通知するようにしましょう。</p>
+<h3 id=参考>参考<a href=#参考 class=hanchor arialabel=Anchor>&#8983;</a> </h3>
+<ul>
+<li><a href=https://wiki.archlinux.jp/index.php/Systemd>systemd - ArchWiki</a></li>
+<li><a href=https://wiki.archlinux.jp/index.php/Systemd/%E3%82%BF%E3%82%A4%E3%83%9E%E3%83%BC>systemd/タイマー - ArchWiki</a></li>
+<li><a href=https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params>Discord Developer Portal — Documentation — Webhook</a></li>
+</ul>
+</div></div>
+<div class=pagination>
+<div class=pagination__title>
+<span class=pagination__title-h>read other posts</span>
+<hr>
+</div>
+<div class=pagination__buttons>
+<span class="button previous">
+<a href=/posts/k8s-cluster-on-raspberry-pi/>
+<span class=button__icon>←</span>
+<span class=button__text>k8s Cluster on Raspberry Pi</span>
+</a>
+</span>
+</div>
+</div>
+</div>
+</div>
+<footer class=footer>
+<div class=footer__inner>
+<div class=copyright>
+<span>© 2022 Powered by <a href=http://gohugo.io>Hugo</a></span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span>
+</div>
+</div>
+</footer>
+<script src=/assets/main.js></script>
+<script src=/assets/prism.js></script>
+</div>
+</body>
+</html>

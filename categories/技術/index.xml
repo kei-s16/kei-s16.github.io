@@ -223,4 +223,60 @@ sudo docker push kisaragi.local:5000/hello-world
 &lt;/blockquote>
 &lt;p>という記述がありましたが、2021/11/18にAsahi Linuxが国内ミラーを作成してくれました！&lt;/p>
 &lt;blockquote class="twitter-tweet">&lt;p lang="en" dir="ltr">We noticed that there was no Arch Linux ARM mirror in Japan, so we&amp;#39;re sponsoring one now 😊&lt;br>&lt;br>If you&amp;#39;re in Japan or nearby, feel free to point your pacman.d/mirrorlist at &lt;a href="https://t.co/GM69rZE3tC">https://t.co/GM69rZE3tC&lt;/a>!&lt;a href="https://t.co/erKHtHwFfX">https://t.co/erKHtHwFfX&lt;/a> &lt;a href="https://t.co/m0opnupc5i">pic.twitter.com/m0opnupc5i&lt;/a>&lt;/p>&amp;mdash; Asahi Linux (@AsahiLinux) &lt;a href="https://twitter.com/AsahiLinux/status/1461268746878656513?ref_src=twsrc%5Etfw">November 18, 2021&lt;/a>&lt;/blockquote>
-&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script></content></item></channel></rss>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script></content></item><item><title>systemctl timer unitを使ってcronを置き換えたときのメモ</title><link>/posts/use-systemd-timer-instead-of-crond/</link><pubDate>Wed, 17 Jun 2020 20:00:00 +0900</pubDate><guid>/posts/use-systemd-timer-instead-of-crond/</guid><description>移植 : https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0 概略 systemdのユニットを定期的に再起動するために 再起動用のサービスユニット 上記ユニットのタイマーユニット を作成し、ついでに実行時にwebhookを使ってDiscordに通知を飛ばす 前提とかおことわりとか Indigo(6vCPU, 8GB)上のUbuntu 18.04で動かしています。 今回定期的に再起動したいサービスユニットは、ARKのプライベートサーバ 上記のサービスユニットをこの記事では(wikiと同じく)ar</description><content>&lt;p>移植 : &lt;a href="https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0">https://gist.github.com/kei-s16/eb5eb5f6657e17eb8e9a422c167e62e0&lt;/a>&lt;/p>
+&lt;hr>
+&lt;h3 id="概略">概略&lt;/h3>
+&lt;p>systemdのユニットを定期的に再起動するために&lt;/p>
+&lt;ul>
+&lt;li>再起動用のサービスユニット&lt;/li>
+&lt;li>上記ユニットのタイマーユニット&lt;/li>
+&lt;/ul>
+&lt;p>を作成し、ついでに実行時にwebhookを使ってDiscordに通知を飛ばす&lt;/p>
+&lt;h3 id="前提とかおことわりとか">前提とかおことわりとか&lt;/h3>
+&lt;ul>
+&lt;li>Indigo(6vCPU, 8GB)上のUbuntu 18.04で動かしています。&lt;/li>
+&lt;li>今回定期的に再起動したいサービスユニットは、&lt;a href="https://ark.gamepedia.com/Dedicated_Server_Setup">ARKのプライベートサーバ&lt;/a>&lt;/li>
+&lt;li>上記のサービスユニットをこの記事では(wikiと同じく)&lt;code>ark-dedicated.service&lt;/code>という名前で登録しています。別名で登録している場合や別のユニットを対象とする場合は適宜読み替えてください。&lt;/li>
+&lt;li>systemdまわりめちゃくちゃ浅い理解で書いてます。&lt;/li>
+&lt;li>コケたときのことはなにも考えてません。&lt;/li>
+&lt;/ul>
+&lt;h3 id="まずは定期的に再起動するように">まずは定期的に再起動するように&lt;/h3>
+&lt;h4 id="再起動用のサービスユニットを作る">再起動用のサービスユニットを作る&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-restart-ark-dedicated.service" data-lang="restart-ark-dedicated.service">&lt;span style="color:#66d9ef">[Unit]&lt;/span>
+&lt;span style="color:#a6e22e">Description&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Restart ark-dedicated.service&lt;/span>
+&lt;span style="color:#66d9ef">[Service]&lt;/span>
+&lt;span style="color:#a6e22e">Type&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">oneshot&lt;/span>
+&lt;span style="color:#a6e22e">ExecStart&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">/bin/systemctl try-restart ark-dedicated.service&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="タイマーユニットを作る">タイマーユニットを作る&lt;/h4>
+&lt;p>今回は誰も遊んでいないであろう毎週水曜日正午に再起動処理を実行することにします。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-restart-ark-dedicated.timer" data-lang="restart-ark-dedicated.timer">&lt;span style="color:#66d9ef">[Unit]&lt;/span>
+&lt;span style="color:#a6e22e">Description&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Restart ark-dedicated.service every wednesday&lt;/span>
+&lt;span style="color:#66d9ef">[Timer]&lt;/span>
+&lt;span style="color:#a6e22e">OnCalendar&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Wed 12:00&lt;/span>
+&lt;span style="color:#a6e22e">Persistent&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">True&lt;/span>
+&lt;span style="color:#66d9ef">[Install]&lt;/span>
+&lt;span style="color:#a6e22e">WantedBy&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">timers.target&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="webhookで通知する">webhookで通知する&lt;/h3>
+&lt;p>いちいち再起動するよーとかしたよーとか言うのもめんどうなので。&lt;/p>
+&lt;h4 id="まずは試してみる">まずは試してみる&lt;/h4>
+&lt;p>&lt;code>通知をしたいDiscordサーバのサーバ設定→ウェブフック&lt;/code>からウェブフックを作り、webhook URLを取得します。&lt;/p>
+&lt;p>とりあえず下記コマンドで雑にメッセージを投げてみる。&lt;/p>
+&lt;pre tabindex="0">&lt;code>curl -X POST -H 'Content-Type: application/json' -d '{&amp;quot;content&amp;quot; : &amp;quot;test&amp;quot;}' webhookのurl
+&lt;/code>&lt;/pre>&lt;h4 id="再起動の開始と終了に合わせて通知を飛ばす">再起動の開始と終了に合わせて通知を飛ばす&lt;/h4>
+&lt;p>&lt;code>restart-ark-dedicated.service&lt;/code>を再び編集し、&lt;code>ExecStartPre&lt;/code>で&lt;code>ExecStart&lt;/code>の実行前に、&lt;code>ExecStartPost&lt;/code>で&lt;code>ExecStart&lt;/code>の実行後に走らせるコマンドをそれぞれ指定します。&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-restart-ark-dedicated.service(編集後)" data-lang="restart-ark-dedicated.service(編集後)">[Unit]
+Description=Restart ark-dedicated.service
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/curl -X POST -H 'Content-Type: application/json' -d '{&amp;quot;content&amp;quot; : &amp;quot;[定期]サーバ再起動開始&amp;quot;}' webhookのurl
+ExecStart=/bin/systemctl try-restart ark-dedicated.service
+ExecStartPost=/usr/bin/curl -X POST -H 'Content-Type: application/json' -d '{&amp;quot;content&amp;quot; : &amp;quot;[定期]サーバ再起動完了&amp;quot;}' webhookのurl
+&lt;/code>&lt;/pre>&lt;h3 id="おわりに">おわりに&lt;/h3>
+&lt;p>このままだと再起動開始通知から速攻で再起動処理が動くのであんまりよくない。
+人に優しくありたいなら30分とか1時間前に通知するようにしましょう。&lt;/p>
+&lt;h3 id="参考">参考&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://wiki.archlinux.jp/index.php/Systemd">systemd - ArchWiki&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wiki.archlinux.jp/index.php/Systemd/%E3%82%BF%E3%82%A4%E3%83%9E%E3%83%BC">systemd/タイマー - ArchWiki&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params">Discord Developer Portal — Documentation — Webhook&lt;/a>&lt;/li>
+&lt;/ul></content></item></channel></rss>
