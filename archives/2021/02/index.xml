@@ -43,28 +43,36 @@ Memory: 279MiB / 12733MiB
 &lt;/li>
 &lt;li>Raspbian 上 で ArchLinux ARM を焼く&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">&lt;span style="color:#75715e"># $はすべて sudo&lt;/span>
-$ fdisk /dev/sda
-&lt;span style="color:#75715e"># いいかんじにパーティション切る&lt;/span>
-$ mkfs.vfat /dev/sda1
-$ mkdir boot
-$ mount /dev/sda1 boot
-$ mkfs.ext4 /dev/sda2
-$ mkdir root
-$ mount /dev/sda2 root
-&lt;span style="color:#75715e"># イメージ落とす&lt;/span>
-$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
-&lt;span style="color:#75715e"># ここから先はsuする&lt;/span>
-$ su
-% bsdtar -xpf ArchLinuxARM-rpi-4-latest.tar.gz -C root
-% sync
-&lt;span style="color:#75715e"># 64bit かつ rpi4 なので&lt;/span>
-% sed -i &lt;span style="color:#e6db74">&amp;#39;s/mmcblk0/mmcblk1/g&amp;#39;&lt;/span> root/etc/fstab
-% mv root/boot/* boot
-&lt;span style="color:#75715e"># マウントしたらちゃんとアンマウントしようね&lt;/span>
-% umount boot root
-&lt;span style="color:#75715e"># これを3セット (さらに別用途で+1セットやったのは秘密)&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="本作業フェイズ">本作業フェイズ&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># $はすべて sudo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ fdisk /dev/sda
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># いいかんじにパーティション切る&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkfs.vfat /dev/sda1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mount /dev/sda1 boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkfs.ext4 /dev/sda2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mount /dev/sda2 root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># イメージ落とす&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># ここから先はsuする&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ su
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% bsdtar -xpf ArchLinuxARM-rpi-4-latest.tar.gz -C root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sync
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 64bit かつ rpi4 なので&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sed -i &lt;span style="color:#e6db74">&amp;#39;s/mmcblk0/mmcblk1/g&amp;#39;&lt;/span> root/etc/fstab
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% mv root/boot/* boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># マウントしたらちゃんとアンマウントしようね&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% umount boot root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># これを3セット (さらに別用途で+1セットやったのは秘密)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="本作業フェイズ">本作業フェイズ&lt;/h3>
 &lt;h4 id="各マシンにホスト名ふったりユーザ作ったり">各マシンにホスト名ふったりユーザ作ったり&lt;/h4>
 &lt;ul>
 &lt;li>&lt;code>pacman -Syyu&lt;/code> めっちゃ重い(国内ミラーなさそう)&lt;/li>
@@ -91,16 +99,16 @@ $ su
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">&lt;span style="color:#75715e">#!/bin/bash -eu
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>pacman -S git base base-devel --noconfirm
-mkdir ~/build/
-cd ~/build
-git clone https://aur.archlinux.org/yay.git
-cd ~/build/yay
-makepkg -si --noconfirm
-cd ~/
-yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntrack-tools cni-plugins --noconfirm
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="kubernetesセットアップ">Kubernetesセットアップ&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">#!/bin/bash -eu
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>pacman -S git base base-devel --noconfirm
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mkdir ~/build/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd ~/build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git clone https://aur.archlinux.org/yay.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd ~/build/yay
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>makepkg -si --noconfirm
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd ~/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntrack-tools cni-plugins --noconfirm
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="kubernetesセットアップ">Kubernetesセットアップ&lt;/h4>
 &lt;h5 id="全体構成">全体構成&lt;/h5>
 &lt;ul>
 &lt;li>kisaragi : Master&lt;/li>
@@ -109,66 +117,66 @@ yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntra
 &lt;/ul>
 &lt;p>お船じゃないよ&lt;/p>
 &lt;h5 id="kisaragiのセットアップ前半戦">kisaragiのセットアップ前半戦&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo kubeadm init --pod-network-cidr&lt;span style="color:#f92672">=&lt;/span>10.244.0.0/16
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown &lt;span style="color:#66d9ef">$(&lt;/span>id -u&lt;span style="color:#66d9ef">)&lt;/span>:&lt;span style="color:#66d9ef">$(&lt;/span>id -g&lt;span style="color:#66d9ef">)&lt;/span> $HOME/.kube/config
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="mogami--kumanoのセットアップ">mogami &amp;amp; kumanoのセットアップ&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo systemctl enable kubelet.service
-sudo systemctl start kubelete.service
-sudo kubeadm join &lt;span style="color:#f92672">{&lt;/span>いろんなひみつのオプション&lt;span style="color:#f92672">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="kisaragiのセットアップ後半戦">kisaragiのセットアップ後半戦&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>sudo kubeadm init --pod-network-cidr&lt;span style="color:#f92672">=&lt;/span>10.244.0.0/16
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mkdir -p $HOME/.kube
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo chown &lt;span style="color:#66d9ef">$(&lt;/span>id -u&lt;span style="color:#66d9ef">)&lt;/span>:&lt;span style="color:#66d9ef">$(&lt;/span>id -g&lt;span style="color:#66d9ef">)&lt;/span> $HOME/.kube/config
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="mogami--kumanoのセットアップ">mogami &amp;amp; kumanoのセットアップ&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>sudo systemctl enable kubelet.service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo systemctl start kubelete.service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo kubeadm join &lt;span style="color:#f92672">{&lt;/span>いろんなひみつのオプション&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="kisaragiのセットアップ後半戦">kisaragiのセットアップ後半戦&lt;/h5>
 &lt;p>クラスターにノードを参加させる&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">kubectl label node mogami node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
-kubectl label node kumano node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">kisaragi% kubectl version
-Client Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:28:09Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}&lt;/span>
-Server Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:20:00Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}}}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="なんかpod動かしてみる">なんかpod動かしてみる&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>kubectl label node mogami node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl label node kumano node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>kisaragi% kubectl version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Client Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:28:09Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Server Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:20:00Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}}}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="なんかpod動かしてみる">なんかpod動かしてみる&lt;/h4>
 &lt;p>オレオレDocker Registry置くことにした&lt;/p>
 &lt;p>deployment.yml&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yml" data-lang="yml">---
-&lt;span style="color:#f92672">apiVersion&lt;/span>: &lt;span style="color:#ae81ff">apps/v1&lt;/span>
-&lt;span style="color:#f92672">kind&lt;/span>: &lt;span style="color:#ae81ff">Deployment&lt;/span>
-&lt;span style="color:#f92672">metadata&lt;/span>:
-&lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">labels&lt;/span>:
-&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">spec&lt;/span>:
-&lt;span style="color:#f92672">replicas&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>
-&lt;span style="color:#f92672">selector&lt;/span>:
-&lt;span style="color:#f92672">matchLabels&lt;/span>:
-&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">template&lt;/span>:
-&lt;span style="color:#f92672">metadata&lt;/span>:
-&lt;span style="color:#f92672">labels&lt;/span>:
-&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">spec&lt;/span>:
-&lt;span style="color:#f92672">hostNetwork&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
-&lt;span style="color:#f92672">tolerations&lt;/span>:
-- &lt;span style="color:#f92672">key&lt;/span>: &lt;span style="color:#ae81ff">node-role.kubernetes.io/master&lt;/span>
-&lt;span style="color:#f92672">effect&lt;/span>: &lt;span style="color:#ae81ff">NoSchedule&lt;/span>
-&lt;span style="color:#f92672">nodeSelector&lt;/span>:
-&lt;span style="color:#f92672">kubernetes.io/hostname&lt;/span>: &lt;span style="color:#ae81ff">kisaragi&lt;/span>
-&lt;span style="color:#f92672">containers&lt;/span>:
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">registry:2.7.1&lt;/span>
-&lt;span style="color:#f92672">ports&lt;/span>:
-- &lt;span style="color:#f92672">containerPort&lt;/span>: &lt;span style="color:#ae81ff">5000&lt;/span>
-&lt;span style="color:#f92672">volumeMounts&lt;/span>:
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
-&lt;span style="color:#f92672">mountPath&lt;/span>: &lt;span style="color:#ae81ff">/var/lib/registry&lt;/span>
-&lt;span style="color:#f92672">volumes&lt;/span>:
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
-&lt;span style="color:#f92672">hostPath&lt;/span>:
-&lt;span style="color:#f92672">type&lt;/span>: &lt;span style="color:#ae81ff">Directory&lt;/span>
-&lt;span style="color:#f92672">path&lt;/span>: &lt;span style="color:#ae81ff">/mnt/exthdd/registry&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>これをデプロイして、外からpull &amp;amp; pushしてみる&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo docker pull hello-world
-sudo docker tag hello-world kisaragi.local:5000/hello-world
-sudo docker push kisaragi.local:5000/hello-world
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>動いた！&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">apiVersion&lt;/span>: &lt;span style="color:#ae81ff">apps/v1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">kind&lt;/span>: &lt;span style="color:#ae81ff">Deployment&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">replicas&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">hostNetwork&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">tolerations&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">key&lt;/span>: &lt;span style="color:#ae81ff">node-role.kubernetes.io/master&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">effect&lt;/span>: &lt;span style="color:#ae81ff">NoSchedule&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">nodeSelector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">kubernetes.io/hostname&lt;/span>: &lt;span style="color:#ae81ff">kisaragi&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">registry:2.7.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">containerPort&lt;/span>: &lt;span style="color:#ae81ff">5000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">volumeMounts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">mountPath&lt;/span>: &lt;span style="color:#ae81ff">/var/lib/registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">volumes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">hostPath&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">type&lt;/span>: &lt;span style="color:#ae81ff">Directory&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">path&lt;/span>: &lt;span style="color:#ae81ff">/mnt/exthdd/registry&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>これをデプロイして、外からpull &amp;amp; pushしてみる&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>sudo docker pull hello-world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo docker tag hello-world kisaragi.local:5000/hello-world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo docker push kisaragi.local:5000/hello-world
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>動いた！&lt;/strong>&lt;/p>
 &lt;h2 id="その他もろもろ">その他もろもろ&lt;/h2>
 &lt;h3 id="つらかったこと">つらかったこと&lt;/h3>
 &lt;ul>

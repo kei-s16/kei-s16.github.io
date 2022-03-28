@@ -1,4 +1,190 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Mon, 21 Feb 2022 01:00:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Github PagesにHugoをデプロイする</title><link>/posts/hugo-on-github-pages/</link><pubDate>Mon, 21 Feb 2022 01:00:00 +0900</pubDate><guid>/posts/hugo-on-github-pages/</guid><description>目次 前置き 背景 選定 やっていき 設計 実装 Hugo GitHubActions GitHub Pagesの設定 完走した感想 前置き 背景 gistなどで管理していたもろもろのメモをもうちょっときれいに見せたくなったので、ブログ形式で残すことにしました。 が、今日日どっかのブログサービスもなーでも自前でWordPressなんかもちょっとキツいなーという感じです。 これだけで伝わらないと思うので、気持ち的な要件をリストアップすると、こんな感じ。 テキストがブラウザ</description><content>&lt;h2 id="目次">目次&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Mon, 28 Mar 2022 02:30:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Dockerfileを書いてみよう</title><link>/posts/how-to-write-a-dockerfile/</link><pubDate>Mon, 28 Mar 2022 02:30:00 +0900</pubDate><guid>/posts/how-to-write-a-dockerfile/</guid><description>はじめに Dockerfileを使ったイメージの作成と起動について人に教える機会も増えてきたこともあり、毎回アドリブでやるのもつらいし日によって質のブレも出てくるので、ここらでいったん文書化することにしました。 想定読者はDockerなんもわからんのでやってみながら覚えたい、ふだんはアプリを書くのがメインな人です。 基本的なshellでの操作(cd, mv, cpなど)はできるものとし、また、Dockerはイン</description><content>&lt;h2 id="はじめに">はじめに&lt;/h2>
+&lt;p>Dockerfileを使ったイメージの作成と起動について人に教える機会も増えてきたこともあり、毎回アドリブでやるのもつらいし日によって質のブレも出てくるので、ここらでいったん文書化することにしました。&lt;br>
+想定読者はDockerなんもわからんのでやってみながら覚えたい、ふだんはアプリを書くのがメインな人です。&lt;br>
+基本的なshellでの操作(cd, mv, cpなど)はできるものとし、また、&lt;code>Docker&lt;/code>はインストール済みのものとします。&lt;code>compose v2&lt;/code>および&lt;code>docker-compose&lt;/code>には触れません。&lt;br>
+最終的に簡単な(&lt;strong>ここ重要&lt;/strong>)スクリプト言語の実行環境を作るためのDockerfileを書くことができるようになることが目的です。
+題材にはPythonを使います。楽なので。&lt;/p>
+&lt;h2 id="目次">目次&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="#docker%E3%81%A8%E3%81%AF">Dockerとは？&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#dockerfile%E3%82%92%E6%9B%B8%E3%81%84%E3%81%A6%E3%81%84%E3%81%8F">Dockerfileを書いていく&lt;/a>
+&lt;ol>
+&lt;li>&lt;a href="#2%E8%A1%8C%E3%81%A7%E5%85%A5%E9%96%80%E3%81%99%E3%82%8B">2行で入門する&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E9%96%91%E8%A9%B1%E4%BC%91%E9%A1%8C--%E8%87%AA%E5%88%86%E7%94%A8%E3%81%AB%E3%82%BF%E3%82%B0%E3%82%92%E8%A8%AD%E5%AE%9A%E3%81%99%E3%82%8B">閑話休題 : 自分用にタグを設定する&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E3%82%BD%E3%83%BC%E3%82%B9%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%92%E3%82%B3%E3%83%B3%E3%83%86%E3%83%8A%E3%81%AB%E5%90%8C%E6%A2%B1%E3%81%97%E3%81%A6%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%8B%E3%82%89%E5%AE%9F%E8%A1%8C%E3%81%A7%E3%81%8D%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB%E3%81%99%E3%82%8B">ソースファイルをコンテナに同梱して、ファイルから実行できるようにする&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E9%96%91%E8%A9%B1%E4%BC%91%E9%A1%8C--arg%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%81%BF%E3%82%88%E3%81%86">閑話休題 : ARGを使ってみよう&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#pip%E3%82%92%E4%BD%BF%E3%81%86">pipを使う&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>&lt;a href="#%E7%B5%82%E3%82%8F%E3%82%8A%E3%81%AB">終わりに&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;h2 id="dockerとは">Dockerとは？&lt;/h2>
+&lt;p>そもそもDockerとは？ についてです。&lt;br>
+&lt;a href="https://docs.docker.com/get-started/overview/">公式&lt;/a>ドキュメントからわかりやすい部分を引用します(引用は&lt;a href="https://docs.docker.jp/get-started/overview.html">有志日本語訳&lt;/a>)。&lt;/p>
+&lt;blockquote>
+&lt;p>Docker はアプリケーションの開発、導入、実行を行うためのオープンなプラットフォームです。Docker を使えば、アプリケーションをインフラストラクチャーから切り離すことができるため、ソフトウエアをすばやく提供することができます。Docker であれば、アプリケーションを管理する手法をそのまま、インフラストラクチャーの管理にも適用できます。&lt;/p>
+&lt;/blockquote>
+&lt;p>これは、より簡単に、こう言い換えることができます。&lt;br>
+&lt;em>Dockerは、任意の必要なソフトウェアだけでアプリケーションの実行を可能&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>にし、開発・運用を簡単にすることが&lt;strong>できる&lt;/strong>ものです&lt;/em>。&lt;/p>
+&lt;p>&lt;code>任意の必要なソフトウェアだけでアプリケーションの実行を可能にする&lt;/code>とはどういうことでしょうか。&lt;br>
+一般的に、アプリケーションの実行環境は複数のソフトウェアの集合です。たとえば、「Hello World!」とだけ書かれたwebページを返すだけのPythonで書かれたアプリのことを考えてみてください。これを、Dockerではない通常のLinux環境で実行する場合、どれくらいのソフトウェアが必要になるでしょうか。&lt;br>
+私もすべてを挙げることはできませんが、すぐに思いつく範囲では下記のようなものがあります。&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>Python&lt;/code>(当然ですね)&lt;/li>
+&lt;li>&lt;code>sshd&lt;/code> or &lt;code>ftp&lt;/code>(コードをデプロイするのに必要です)&lt;/li>
+&lt;li>なにかしらのネットワークマネージャ&lt;/li>
+&lt;li>上記のソフトウェアをインストールするためのパッケージマネージャ(&lt;code>apt&lt;/code>や&lt;code>pacman&lt;/code>)&lt;/li>
+&lt;li>上記のソフトウェアを実行するためのプロセス管理システム(&lt;code>init.d&lt;/code>や&lt;code>systemd&lt;/code>)&lt;/li>
+&lt;li>linux kernel&lt;/li>
+&lt;/ul>
+&lt;p>上記のソフトウェア群はそれぞれが動作のために別のソフトウェアを要求します。アプリケーションを運用するということは、大量のソフトウェアを運用することです。&lt;br>
+どこまで厳密にやるかはともかく、パフォーマンスのため、セキュリティレベル維持のため、アプリケーションのソースコードに加えて、これらのうちある程度の管理が必要ということです。具体的には&lt;code>Ansible&lt;/code>や&lt;code>Chef&lt;/code>などの構成管理ツールや&lt;code>cloud-init&lt;/code>などを利用してサーバの状態を一定にしたり、カーネルのバージョンアップをしたり&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>です。&lt;br>
+このレイヤーの出来事はアプリケーションの健全な実行に必要ですが、開発者としては若干別領域、たとえばインフラエンジニアやSREの領域に見えるため、本格的にやるにはちょっと躊躇する部分かもしれません。&lt;br>
+ところが、この部分を開発者以外に任せることにすると、別の複数の問題が発生します。たとえば、ミドルウェアレベルの構成変更にチーム外の人間とのやりとりが必要になったり、アプリケーション実行環境の全体像がアプリケーション開発者にぼんやりとしか見えなくなったりです。これらは最終的に開発速度の低下を引き起こします。&lt;/p>
+&lt;p>そこで、Dockerの出番というわけです。&lt;br>
+Docker&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>を利用することで、深いlinuxサーバの知識がなくとも、実行環境を簡単な定義ファイル&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>だけで整えることができるようになります。&lt;/p>
+&lt;p>とだけ書くと、まるで夢のような技術に聞こえてしまうのですが、ここで先ほどのテキストの太字部分を思い出してください。&lt;/p>
+&lt;blockquote>
+&lt;p>開発・運用を簡単にすることが&lt;strong>できる&lt;/strong>&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;strong>できる&lt;/strong>とあります。&lt;strong>簡単になる&lt;/strong>ではないことに留意してください。&lt;br>
+DockerにはDockerの作法があり、作法を逸脱するとわりとつらい思いをします。コンテナの概念に慣れていないと、この作法の逸脱をしてしまいがちです。Dockerの不便さを解消しようとするまえに、あなたが不便に思うこと、そして解消したいことがコンテナの考え方に反していないかを考えてみてください。少しオーウェル的ですが、その不便さこそがコンテナの利便性を提供しているものかもしれません&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>。&lt;/p>
+&lt;p>それでは、やっていきましょう&lt;/p>
+&lt;h2 id="dockerfileを書いていく">Dockerfileを書いていく&lt;/h2>
+&lt;p>扱うファイルが多いので、あらかじめできあがったものを公開しています。必要に応じて参照したり、cloneしてご利用ください。&lt;br>
+&lt;a href="https://github.com/kei-s16/blog-docker-examples">kei-s16/blog-docker-examples&lt;/a>&lt;/p>
+&lt;h3 id="2行で入門する">2行で入門する&lt;/h3>
+&lt;p>このセクションのサンプルは&lt;a href="https://github.com/kei-s16/blog-docker-examples/tree/main/example1">example1&lt;/a>にあります。&lt;/p>
+&lt;p>Dockerコンテナを起動するためにはコンテナイメージと呼ばれるものが必要で、コンテナイメージを作るためにはDockerfileという定義ファイルを書いてあげる必要があります。このセクションでは、この一連の流れを体験しましょう。&lt;/p>
+&lt;p>まずはDockerfileを書いて、コンテナイメージをビルドし、コンテナを立ち上げるためだけの小さなPythonコードを考えます。&lt;br>
+最初から大きくやるとたいてい失敗するので、極端なほど小さく始めましょう。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>print(&lt;span style="color:#e6db74">&amp;#34;Hello World!&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>はい、Hello Worldです。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>python -c &lt;span style="color:#e6db74">&amp;#39;print(&amp;#34;Hello World!&amp;#34;)&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% python -c &lt;span style="color:#e6db74">&amp;#39;print(&amp;#34;Hello World!&amp;#34;)&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello World!
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>まごうことなきHello Worldですね。&lt;br>
+まずはこのコマンドをそのままコンテナ環境で実行できるようにしていきましょう。&lt;br>
+作業ディレクトリに、Dockerfileという名前のファイルを作成し、内容を下記の通りに編集してください。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> python:3.10.4-bullseye&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">CMD&lt;/span> [&lt;span style="color:#e6db74">&amp;#34;python&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;-c&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;print(&amp;#39;Hello World!&amp;#39;)&amp;#34;&lt;/span>]&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>1行目は、&lt;code>FROM&lt;/code>というベースとなるイメージを取得してくるコマンドを実行しています。値として、&lt;code>イメージ名:タグ(任意)&lt;/code>の形式の文字列を与えることで、コンテナレジストリ&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup>からイメージをダウンロードしてきます(Dockerではこれを&lt;code>pull&lt;/code>といいます)。また、タグが明示的に指定されなかった場合(今回であれば、&lt;code>FROM python&lt;/code>)には、最新のイメージ(&lt;code>latest&lt;/code>タグのイメージ)が指定されたものとして振る舞います。
+今回は、&lt;code>Python&lt;/code>が実行できるイメージのうち、Pythonのバージョンが3.10.4でdebianのbullseyeならだいたい入ってそうなパッケージの詰まったもの(&lt;code>3.10.4-bullseye&lt;/code>)を持ってくるようにしています。&lt;br>
+こうしたコンテナイメージは、&lt;a href="https://hub.docker.com/">Dockerhub&lt;/a>で探すことができます。&lt;/p>
+&lt;p>2行目は、&lt;code>CMD&lt;/code>コマンドです。&lt;code>CMD&lt;/code>はDockerfileの中で一度しか使えないコマンドで、コンテナ起動時のデフォルトの挙動を定義します。今回はPythonでprintを実行するコマンドをデフォルトで定義しているので、コマンドの上書きをして実行をしなければ、コンテナ起動時にHello World! とプリントされます。&lt;code>CMD&lt;/code>には値として、&lt;code>実行したいコマンドをスペース区切りごとにダブルクォートで括ったもの&lt;/code>を&lt;code>[]&lt;/code>で括った文字列を渡します。&lt;/p>
+&lt;p>では、このDockerfileをビルドして、ビルドしたイメージを起動してみましょう。&lt;/p>
+&lt;p>まずはこのコマンドでビルドします。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% docker build -f ./Dockerfile .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>おそらく、末尾に下記のような文言が出力されるはずです。IMAGE IDの部分を控えておいてください。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Successfully built &lt;span style="color:#f92672">{&lt;/span>IMAGE ID&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>次に、このコマンドを実行することでコンテナが起動します。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% docker run &lt;span style="color:#f92672">{&lt;/span>IMAGE ID&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>どうですか？ &lt;code>Hello World!&lt;/code> と出力され、正常に処理が終了したためコンテナも終了し、ターミナルに戻ったはずです。Dockerfileを書いて、コンテナイメージをビルドし、コンテナを立ち上げるという一連の流れを体験することができましたね！&lt;/p>
+&lt;h3 id="閑話休題--自分用にタグを設定する">閑話休題 : 自分用にタグを設定する&lt;/h3>
+&lt;p>ところで、先ほどの手順でIMAGE IDを利用するのが面倒ではありませんでしたか？&lt;br>
+実は、&lt;code>--tag&lt;/code>(省略形は&lt;code>-t&lt;/code>)オプションを使うことで自分用にタグをつけることができ、そのタグを使ってコンテナイメージを指定することができます。
+たとえばこんな感じです。&lt;/p>
+&lt;pre tabindex="0">&lt;code>% docker build -f ./Dockerfile --tag=&amp;#34;python-tutorial:step1&amp;#34;.
+% docker run python-tutorial:step1
+&lt;/code>&lt;/pre>&lt;h3 id="ソースファイルをコンテナに同梱してファイルから実行できるようにする">ソースファイルをコンテナに同梱して、ファイルから実行できるようにする&lt;/h3>
+&lt;p>このセクションのサンプルは&lt;a href="https://github.com/kei-s16/blog-docker-examples/tree/main/example2">example2&lt;/a>にあります。&lt;/p>
+&lt;p>さきほどの手順では、コマンドラインから渡す形式でしかPythonスクリプトを実行することができませんでした。&lt;br>
+しかし、実際のアプリケーションは複数のコマンドからなるため、ファイルにまとめられているはずです。さきほどの手順では、本格的なアプリケーションが実行できないのです&lt;sup id="fnref:7">&lt;a href="#fn:7" class="footnote-ref" role="doc-noteref">7&lt;/a>&lt;/sup>。&lt;br>
+というわけで、このセクションではソースファイルからアプリを実行できるDockerコンテナを作成してみます。&lt;/p>
+&lt;p>前のセクションで使ったDockerfileを編集するか、新しく作業ディレクトリを作成してDockerfileという名前のファイルを作成するかのどちらかを実施し、内容を下記の通りにしてください(改行は省略してもかまいません)。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-Dockerfile" data-lang="Dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> python:3.10.4-bullseye&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">WORKDIR&lt;/span>&lt;span style="color:#e6db74"> /usr/src/app&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">COPY&lt;/span> ./src .&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">CMD&lt;/span> [&lt;span style="color:#e6db74">&amp;#34;python&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;./main.py&amp;#34;&lt;/span>]&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>その後、Dockerfileのあるディレクトリに&lt;code>src&lt;/code>という名前のディレクトリを作成し、その中に&lt;code>main.py&lt;/code>というファイルを作成してください。中身は下記のように編集してください。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>print(&lt;span style="color:#e6db74">&amp;#34;Hello World!&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>さて、ここまでの手順で、作業ディレクトリの構造はこのようになっているはずです。&lt;/p>
+&lt;pre tabindex="0">&lt;code>- 作業ディレクトリ
+- Dockerfile
+- src
+- main.py
+&lt;/code>&lt;/pre>&lt;p>ディレクトリの中身が正しいことを確認したら、下記のコマンドを実行して、どうなるか見てみましょう。&lt;/p>
+&lt;pre tabindex="0">&lt;code>% docker build -f ./Dockerfile --tag=&amp;#34;python-tutorial:step2&amp;#34; .
+% docker run python-tutorial:step2
+&lt;/code>&lt;/pre>&lt;p>どうでしたか？ &lt;code>Hello World!&lt;/code> と出力されましたか？&lt;/p>
+&lt;p>ではここで、Dockerfileの中に書いた、新しいコマンドについて説明します。&lt;br>
+&lt;code>WORKDIR&lt;/code>は、Dockerfileに書かれたコマンドを実行するディレクトリを変更するコマンドです。たとえば、&lt;code>WORKDIR /usr/src/app&lt;/code>を実行したあとの処理で&lt;code>pwd&lt;/code>を実行すれば&lt;code>/usr/src/app&lt;/code>と出力されますし、&lt;code>cat ./hoge&lt;/code>とすれば&lt;code>/usr/src/app/hoge&lt;/code>を出力しようとします。また、&lt;code>WORKDIR&lt;/code>で存在するディレクトリを指定するとそのディレクトリに移動するだけですが、存在しないディレクトリを指定した場合は、移動先のディレクトリを作成してから移動します。&lt;br>
+&lt;code>COPY&lt;/code>は、コンテナをビルドする環境のファイルシステムから、コンテナに対してファイルをコピーするコマンドです。&lt;code>COPY ./src .&lt;/code>は、ビルド環境のカレントディレクトリにある&lt;code>src&lt;/code>ディレクトリを、コンテナのカレントディレクトリにコピーすることを意味します。&lt;/p>
+&lt;p>これを踏まえて今回のDockerfileを読むと、&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>/usr/src/app&lt;/code>に移動する&lt;/li>
+&lt;li>ホストマシンの&lt;code>./src&lt;/code>から&lt;code>/usr/src/app&lt;/code>にファイルをコピーする&lt;/li>
+&lt;li>デフォルトでは&lt;code>python /usr/src/app/main.py&lt;/code>を実行するように設定する&lt;/li>
+&lt;/ol>
+&lt;p>という処理がビルド時に実行されることがわかります。&lt;/p>
+&lt;p>注意点として、あたりまえですが&lt;code>COPY&lt;/code>したファイルはコンテナイメージに含まれます。コンテナイメージをダウンロードした人は誰でもコンテナの中に置かれたファイルを見ることができるようになるということです。業務でも個人プロジェクトでもそうですが、機密情報はコンテナイメージの外(S3やDBなど)に持つようにする、&lt;code>ENV&lt;/code>コマンドを使うことで環境変数として起動時に初めて渡すようにし、イメージ内部には持たないようにするなどしましょう。そもそも機密を含むものが誰でも利用できるようになること自体避けたいわけですが(プロダクション用のイメージなどはプライベートレジストリを使うべきです)。&lt;/p>
+&lt;h3 id="閑話休題--argを使ってみよう">閑話休題 : ARGを使ってみよう&lt;/h3>
+&lt;p>ここまで書いたDockerfileはすべてタグを固定で書いています。別のイメージを試したくなったときはDockerfileに手を加える必要があるわけですが、試すだけなのにエディタを開くのはちょっとおっくうです。&lt;br>
+そこで、ビルドコマンドの引数でタグを渡してあげればいい感じに&lt;code>FROM&lt;/code>で持ってくるイメージを変えることができるようにしてみましょう。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-Dockerfile" data-lang="Dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">ARG&lt;/span> TAG&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;3.10.4-bullseye&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> python:$TAG&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">WORKDIR&lt;/span>&lt;span style="color:#e6db74"> /usr/src/app&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">COPY&lt;/span> ./src .&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">CMD&lt;/span> [&lt;span style="color:#e6db74">&amp;#34;python&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;./main.py&amp;#34;&lt;/span>]&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>新しく追加した&lt;code>ARG&lt;/code>コマンドは、ビルド時に受けつける追加の引数名と、そのデフォルト値を定義できるコマンドです。例では、&lt;code>TAG&lt;/code>という引数を受けつけるようにし、その引数が与えられなかった場合は&lt;code>python:3.10.4-bullseye&lt;/code>が与えられたものとして振る舞うように設定されています。そして、&lt;code>TAG&lt;/code>は&lt;code>FROM&lt;/code>コマンドで利用されています。これで、ビルド時の引数としてイメージタグを受け取れるようになったわけです。&lt;br>
+引数は&lt;code>--build-arg&lt;/code>オプションで与えます。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% docker build -f ./Dockerfile --tag&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;python-tutorial:extra&amp;#34;&lt;/span> --build-arg TAG&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;3.11-rc-bullseye&amp;#34;&lt;/span>.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>ユースケースとしては、上記の例のように実行環境を気軽に上げて検証できるようにする、などがあります。その他にも、様々な使い方があります。いずれ活用してみてください。&lt;/p>
+&lt;h3 id="pipを使う">pipを使う&lt;/h3>
+&lt;p>このセクションのサンプルは&lt;a href="https://github.com/kei-s16/blog-docker-examples/tree/main/example3">example3&lt;/a>にあります。&lt;/p>
+&lt;p>ここまでである程度ちゃんとしたPythonの実行を作成できるようになりましたが、なにか抜けていませんか？ そう、外部パッケージの利用です。&lt;br>
+愚直な方法はビルドを実行するマシンで&lt;code>pip install&lt;/code>して、それを参照することですが、なんというかいろいろ問題がありますね。pipを使ううまみがほとんどないというか……。&lt;br>
+でも、現時点で私たちが知っているビルドにコマンドを実行する方法は&lt;code>CMD&lt;/code>コマンドだけです。ここにコマンドを書いても、実行時コマンドの上書きで実行されない可能性がありますし、なにより&lt;code>CMD&lt;/code>はDockerfileのなかで一度しか使うことができません。&lt;br>
+というわけで、&lt;code>CMD&lt;/code>以外のコマンドを使って、コンテナらしくビルド中に&lt;code>pip&lt;/code>を使えるようにし、コンテナ上のPythonで外部パッケージを扱ってみましょう。&lt;/p>
+&lt;p>今回は、&lt;a href="https://pypi.org/project/colorama/">colorama&lt;/a>を利用して、文字列を赤く出力してみます。&lt;br>
+&lt;a href="https://github.com/kei-s16/blog-docker-examples/tree/main/example3">example3&lt;/a>を参考に、お手元に必要なファイルを用意し、ビルドと実行をしてみてください。うまくいけば、赤文字でHello World! と表示されるはずです。&lt;/p>
+&lt;p>さて、どうやって&lt;code>pip install&lt;/code>と&lt;code>python main.py&lt;/code>のふたつを実行できるようにしたのでしょうか？ 答えはこの行にあります。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-Dockerfile" data-lang="Dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">RUN&lt;/span> pip install --no-cache-dir -r requirements.txt&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>ここで登場する&lt;code>RUN&lt;/code>というコマンドは、コンテナのビルドの途中で任意のコマンドを実行するために使われます。&lt;code>CMD&lt;/code>と違い、コマンドはふだんシェルで入力する形で与えることもできます。&lt;code>CMD&lt;/code>で実行する処理に必要な前準備は、&lt;code>RUN&lt;/code>を使って記述します。たとえば、今回のようなアプリケーションが利用する外部パッケージのインストールのほか、外部サービスから設定をダウンロードしてきたり、ソースコードから実行可能なバイナリをビルドしたりするのには&lt;code>RUN&lt;/code>コマンドを使うといいと思います&lt;sup id="fnref:8">&lt;a href="#fn:8" class="footnote-ref" role="doc-noteref">8&lt;/a>&lt;/sup>。&lt;/p>
+&lt;h2 id="終わりに">終わりに&lt;/h2>
+&lt;p>今回は、基本的なアプリケーションを実行するために必要な最低限のDockerfile知識をまとめました。&lt;br>
+この次のステップは、自分のサービスを動かしてみることになると思います。そのステップをやりきるには、この記事にある情報だけでは難しいと思います。公式ドキュメントに軽く目を通しながら進めていくことを強くおすすめします。&lt;br>
+また、記事では触れませんでしたが、リポジトリには&lt;code>ステージ&lt;/code>とそれを活用した&lt;code>マルチステージビルド&lt;/code>の例も置いています&lt;sup id="fnref:9">&lt;a href="#fn:9" class="footnote-ref" role="doc-noteref">9&lt;/a>&lt;/sup>。気になる方はどうぞ。&lt;/p>
+&lt;p>コメントや誤りの連絡は、&lt;a href="https://github.com/kei-s16/kei-s16.github.io/issues/new">issue&lt;/a>にお願いします。&lt;/p>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>厳密には、&lt;code>カーネルレベルの依存関係をすべてホストマシンに委ねることで、Dockerを利用している開発者の視点では任意の必要なソフトウェアだけでのアプリケーションの実行が可能になっているように見える&lt;/code>。Dockerの実行環境自身がときどきこのあたり意識することを要求してくる。ECSやCloud Runなどのマネージドなコンテナ実行環境を利用するなら、この部分はクラウド事業者が管理してくれるのである程度無視できる。&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>このセクションには理想が多分に含まれている。&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>厳密にはコンテナ仮想化技術。&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>誰向けなのかわからない注釈 : Vagrantfileのようなものを想像するとわかりやすい。&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:5" role="doc-endnote">
+&lt;p>なんでこんなことを書いているのかって？ ひどい目にあったからですよ(なんもわかってないときに書いたDockerfileを直しながら)。&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:6" role="doc-endnote">
+&lt;p>タグだけ与えた場合はデフォルトではDockerhubから取得してくる。URIを与えることで、任意のコンテナレジストリ&lt;sup id="fnref:10">&lt;a href="#fn:10" class="footnote-ref" role="doc-noteref">10&lt;/a>&lt;/sup>から取得することができる。&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:7" role="doc-endnote">
+&lt;p>ここでワンライナーを持ち出すのはやめてください。&amp;#160;&lt;a href="#fnref:7" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:8" role="doc-endnote">
+&lt;p>とはいえ、&lt;code>RUN&lt;/code>にはビルドの仕組みを知らないとひっかかりやすい落とし穴があったりする。ガリガリ書き始めるまえに、公式ドキュメントを読むことをおすすめします。&amp;#160;&lt;a href="#fnref:8" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:9" role="doc-endnote">
+&lt;p>途中で力尽きたとも言う。想定読者的にはまだいらんじゃろという気持ちもある&amp;#160;&lt;a href="#fnref:9" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:10" role="doc-endnote">
+&lt;p>Elastic Container Registry, Github Contgainer Registry, 自宅に立てたオレオレレジストリなど。&amp;#160;&lt;a href="#fnref:10" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></content></item><item><title>Github PagesにHugoをデプロイする</title><link>/posts/hugo-on-github-pages/</link><pubDate>Mon, 21 Feb 2022 01:00:00 +0900</pubDate><guid>/posts/hugo-on-github-pages/</guid><description>目次 前置き 背景 選定 やっていき 設計 実装 Hugo GitHubActions GitHub Pagesの設定 完走した感想 前置き 背景 gistなどで管理していたもろもろのメモをもうちょっときれいに見せたくなったので、ブログ形式で残すことにしました。 が、今日日どっかのブログサービスもなーでも自前でWordPressなんかもちょっとキツいなーという感じです。 これだけで伝わらないと思うので、気持ち的な要件をリストアップすると、こんな感じ。 テキストがブラウザ</description><content>&lt;h2 id="目次">目次&lt;/h2>
 &lt;ol>
 &lt;li>&lt;a href="#%E5%89%8D%E7%BD%AE%E3%81%8D">前置き&lt;/a>
 &lt;ol>
@@ -53,38 +239,39 @@ mdファイル(というかソース)を管理するリポジトリと、公開�
 &lt;h4 id="github-actions">GitHub Actions&lt;/h4>
 &lt;p>GitHub Actions、つまりはデプロイ=記事の投稿です。&lt;br>
 &lt;a href="https://rmoff.net/2020/12/20/scheduling-hugo-builds-on-github-pages-with-github-actions/">Scheduling Hugo Builds on GitHub pages with GitHub Actions&lt;/a>という記事を参考に、ちょっと手を入れたデプロイを組んでいます。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yml" data-lang="yml">&lt;span style="color:#f92672">on&lt;/span>:
-&lt;span style="color:#f92672">push&lt;/span>:
-&lt;span style="color:#f92672">branches&lt;/span>:
-- &lt;span style="color:#ae81ff">main&lt;/span>
-&lt;span style="color:#f92672">jobs&lt;/span>:
-&lt;span style="color:#f92672">build-and-deploy&lt;/span>:
-&lt;span style="color:#f92672">runs-on&lt;/span>: &lt;span style="color:#ae81ff">ubuntu-latest&lt;/span>
-&lt;span style="color:#f92672">steps&lt;/span>:
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">checkout source&lt;/span>
-&lt;span style="color:#f92672">uses&lt;/span>: &lt;span style="color:#ae81ff">actions/checkout@v2&lt;/span>
-&lt;span style="color:#f92672">with&lt;/span>:
-&lt;span style="color:#f92672">submodules&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
-&lt;span style="color:#f92672">fetch-depth&lt;/span>: &lt;span style="color:#ae81ff">0&lt;/span>
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">remove .gitignore&lt;/span>
-&lt;span style="color:#f92672">run&lt;/span>: &lt;span style="color:#ae81ff">rm ./.gitignore&lt;/span>
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">setup hugo&lt;/span>
-&lt;span style="color:#f92672">uses&lt;/span>: &lt;span style="color:#ae81ff">peaceiris/actions-hugo@v2&lt;/span>
-&lt;span style="color:#f92672">with&lt;/span>:
-&lt;span style="color:#f92672">hugo-version&lt;/span>: &lt;span style="color:#e6db74">&amp;#39;latest&amp;#39;&lt;/span>
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">build&lt;/span>
-&lt;span style="color:#f92672">run&lt;/span>: &lt;span style="color:#ae81ff">hugo --minify&lt;/span>
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">copy verify files to public&lt;/span>
-&lt;span style="color:#f92672">run&lt;/span>: &lt;span style="color:#ae81ff">cp ./verify/* ./public&lt;/span>
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">deploy&lt;/span>
-&lt;span style="color:#f92672">uses&lt;/span>: &lt;span style="color:#ae81ff">peaceiris/actions-gh-pages@v3&lt;/span>
-&lt;span style="color:#f92672">if&lt;/span>: &lt;span style="color:#ae81ff">${{ github.ref == &amp;#39;refs/heads/main&amp;#39; }}&lt;/span>
-&lt;span style="color:#f92672">with&lt;/span>:
-&lt;span style="color:#f92672">deploy_key&lt;/span>: &lt;span style="color:#ae81ff">${{ secrets.ACTIONS_DEPLOY_KEY }}&lt;/span>
-&lt;span style="color:#f92672">external_repository&lt;/span>: &lt;span style="color:#ae81ff">kei-s16/kei-s16.github.io&lt;/span>
-&lt;span style="color:#f92672">publish_dir&lt;/span>: &lt;span style="color:#ae81ff">./public&lt;/span>
-&lt;span style="color:#f92672">publish_branch&lt;/span>: &lt;span style="color:#ae81ff">main&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>やっていることは元記事と同じくhugoでビルドして、公開用リポジトリにpushしているだけです。&lt;br>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">on&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">push&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">branches&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">jobs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">build-and-deploy&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">runs-on&lt;/span>: &lt;span style="color:#ae81ff">ubuntu-latest&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">steps&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">checkout source&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">uses&lt;/span>: &lt;span style="color:#ae81ff">actions/checkout@v2&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">with&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">submodules&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">fetch-depth&lt;/span>: &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">remove .gitignore&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">run&lt;/span>: &lt;span style="color:#ae81ff">rm ./.gitignore&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">setup hugo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">uses&lt;/span>: &lt;span style="color:#ae81ff">peaceiris/actions-hugo@v2&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">with&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">hugo-version&lt;/span>: &lt;span style="color:#e6db74">&amp;#39;latest&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">build&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">run&lt;/span>: &lt;span style="color:#ae81ff">hugo --minify&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">copy verify files to public&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">run&lt;/span>: &lt;span style="color:#ae81ff">cp ./verify/* ./public&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">deploy&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">uses&lt;/span>: &lt;span style="color:#ae81ff">peaceiris/actions-gh-pages@v3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">if&lt;/span>: &lt;span style="color:#ae81ff">${{ github.ref == &amp;#39;refs/heads/main&amp;#39; }}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">with&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">deploy_key&lt;/span>: &lt;span style="color:#ae81ff">${{ secrets.ACTIONS_DEPLOY_KEY }}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">external_repository&lt;/span>: &lt;span style="color:#ae81ff">kei-s16/kei-s16.github.io&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">publish_dir&lt;/span>: &lt;span style="color:#ae81ff">./public&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">publish_branch&lt;/span>: &lt;span style="color:#ae81ff">main&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>やっていることは元記事と同じくhugoでビルドして、公開用リポジトリにpushしているだけです。&lt;br>
 違うところはといえば、&lt;/p>
 &lt;ul>
 &lt;li>私の場合はgitignoreでソースリポジトリに生成物を持たない(public以下を持たない)ようにしているため、そこをごにょごにょするための処理を追加した&lt;/li>
@@ -223,28 +410,36 @@ Memory: 279MiB / 12733MiB
 &lt;/li>
 &lt;li>Raspbian 上 で ArchLinux ARM を焼く&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">&lt;span style="color:#75715e"># $はすべて sudo&lt;/span>
-$ fdisk /dev/sda
-&lt;span style="color:#75715e"># いいかんじにパーティション切る&lt;/span>
-$ mkfs.vfat /dev/sda1
-$ mkdir boot
-$ mount /dev/sda1 boot
-$ mkfs.ext4 /dev/sda2
-$ mkdir root
-$ mount /dev/sda2 root
-&lt;span style="color:#75715e"># イメージ落とす&lt;/span>
-$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
-&lt;span style="color:#75715e"># ここから先はsuする&lt;/span>
-$ su
-% bsdtar -xpf ArchLinuxARM-rpi-4-latest.tar.gz -C root
-% sync
-&lt;span style="color:#75715e"># 64bit かつ rpi4 なので&lt;/span>
-% sed -i &lt;span style="color:#e6db74">&amp;#39;s/mmcblk0/mmcblk1/g&amp;#39;&lt;/span> root/etc/fstab
-% mv root/boot/* boot
-&lt;span style="color:#75715e"># マウントしたらちゃんとアンマウントしようね&lt;/span>
-% umount boot root
-&lt;span style="color:#75715e"># これを3セット (さらに別用途で+1セットやったのは秘密)&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="本作業フェイズ">本作業フェイズ&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># $はすべて sudo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ fdisk /dev/sda
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># いいかんじにパーティション切る&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkfs.vfat /dev/sda1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mount /dev/sda1 boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkfs.ext4 /dev/sda2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mount /dev/sda2 root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># イメージ落とす&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># ここから先はsuする&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ su
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% bsdtar -xpf ArchLinuxARM-rpi-4-latest.tar.gz -C root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sync
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 64bit かつ rpi4 なので&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sed -i &lt;span style="color:#e6db74">&amp;#39;s/mmcblk0/mmcblk1/g&amp;#39;&lt;/span> root/etc/fstab
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% mv root/boot/* boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># マウントしたらちゃんとアンマウントしようね&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% umount boot root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># これを3セット (さらに別用途で+1セットやったのは秘密)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="本作業フェイズ">本作業フェイズ&lt;/h3>
 &lt;h4 id="各マシンにホスト名ふったりユーザ作ったり">各マシンにホスト名ふったりユーザ作ったり&lt;/h4>
 &lt;ul>
 &lt;li>&lt;code>pacman -Syyu&lt;/code> めっちゃ重い(国内ミラーなさそう)&lt;/li>
@@ -271,16 +466,16 @@ $ su
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">&lt;span style="color:#75715e">#!/bin/bash -eu
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>pacman -S git base base-devel --noconfirm
-mkdir ~/build/
-cd ~/build
-git clone https://aur.archlinux.org/yay.git
-cd ~/build/yay
-makepkg -si --noconfirm
-cd ~/
-yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntrack-tools cni-plugins --noconfirm
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="kubernetesセットアップ">Kubernetesセットアップ&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">#!/bin/bash -eu
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>pacman -S git base base-devel --noconfirm
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mkdir ~/build/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd ~/build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git clone https://aur.archlinux.org/yay.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd ~/build/yay
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>makepkg -si --noconfirm
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd ~/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntrack-tools cni-plugins --noconfirm
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="kubernetesセットアップ">Kubernetesセットアップ&lt;/h4>
 &lt;h5 id="全体構成">全体構成&lt;/h5>
 &lt;ul>
 &lt;li>kisaragi : Master&lt;/li>
@@ -289,66 +484,66 @@ yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntra
 &lt;/ul>
 &lt;p>お船じゃないよ&lt;/p>
 &lt;h5 id="kisaragiのセットアップ前半戦">kisaragiのセットアップ前半戦&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo kubeadm init --pod-network-cidr&lt;span style="color:#f92672">=&lt;/span>10.244.0.0/16
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown &lt;span style="color:#66d9ef">$(&lt;/span>id -u&lt;span style="color:#66d9ef">)&lt;/span>:&lt;span style="color:#66d9ef">$(&lt;/span>id -g&lt;span style="color:#66d9ef">)&lt;/span> $HOME/.kube/config
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="mogami--kumanoのセットアップ">mogami &amp;amp; kumanoのセットアップ&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo systemctl enable kubelet.service
-sudo systemctl start kubelete.service
-sudo kubeadm join &lt;span style="color:#f92672">{&lt;/span>いろんなひみつのオプション&lt;span style="color:#f92672">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="kisaragiのセットアップ後半戦">kisaragiのセットアップ後半戦&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>sudo kubeadm init --pod-network-cidr&lt;span style="color:#f92672">=&lt;/span>10.244.0.0/16
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mkdir -p $HOME/.kube
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo chown &lt;span style="color:#66d9ef">$(&lt;/span>id -u&lt;span style="color:#66d9ef">)&lt;/span>:&lt;span style="color:#66d9ef">$(&lt;/span>id -g&lt;span style="color:#66d9ef">)&lt;/span> $HOME/.kube/config
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="mogami--kumanoのセットアップ">mogami &amp;amp; kumanoのセットアップ&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>sudo systemctl enable kubelet.service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo systemctl start kubelete.service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo kubeadm join &lt;span style="color:#f92672">{&lt;/span>いろんなひみつのオプション&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="kisaragiのセットアップ後半戦">kisaragiのセットアップ後半戦&lt;/h5>
 &lt;p>クラスターにノードを参加させる&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">kubectl label node mogami node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
-kubectl label node kumano node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">kisaragi% kubectl version
-Client Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:28:09Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}&lt;/span>
-Server Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:20:00Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}}}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="なんかpod動かしてみる">なんかpod動かしてみる&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>kubectl label node mogami node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl label node kumano node-role.kubernetes.io/worker&lt;span style="color:#f92672">=&lt;/span>worker
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>kisaragi% kubectl version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Client Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:28:09Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Server Version: version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;20&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.20.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;faecb196815e248d3ecfb03c680a4507229c2a56&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2021-01-13T13:20:00Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.15.5&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}}}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="なんかpod動かしてみる">なんかpod動かしてみる&lt;/h4>
 &lt;p>オレオレDocker Registry置くことにした&lt;/p>
 &lt;p>deployment.yml&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yml" data-lang="yml">---
-&lt;span style="color:#f92672">apiVersion&lt;/span>: &lt;span style="color:#ae81ff">apps/v1&lt;/span>
-&lt;span style="color:#f92672">kind&lt;/span>: &lt;span style="color:#ae81ff">Deployment&lt;/span>
-&lt;span style="color:#f92672">metadata&lt;/span>:
-&lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">labels&lt;/span>:
-&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">spec&lt;/span>:
-&lt;span style="color:#f92672">replicas&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>
-&lt;span style="color:#f92672">selector&lt;/span>:
-&lt;span style="color:#f92672">matchLabels&lt;/span>:
-&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">template&lt;/span>:
-&lt;span style="color:#f92672">metadata&lt;/span>:
-&lt;span style="color:#f92672">labels&lt;/span>:
-&lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">spec&lt;/span>:
-&lt;span style="color:#f92672">hostNetwork&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
-&lt;span style="color:#f92672">tolerations&lt;/span>:
-- &lt;span style="color:#f92672">key&lt;/span>: &lt;span style="color:#ae81ff">node-role.kubernetes.io/master&lt;/span>
-&lt;span style="color:#f92672">effect&lt;/span>: &lt;span style="color:#ae81ff">NoSchedule&lt;/span>
-&lt;span style="color:#f92672">nodeSelector&lt;/span>:
-&lt;span style="color:#f92672">kubernetes.io/hostname&lt;/span>: &lt;span style="color:#ae81ff">kisaragi&lt;/span>
-&lt;span style="color:#f92672">containers&lt;/span>:
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
-&lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">registry:2.7.1&lt;/span>
-&lt;span style="color:#f92672">ports&lt;/span>:
-- &lt;span style="color:#f92672">containerPort&lt;/span>: &lt;span style="color:#ae81ff">5000&lt;/span>
-&lt;span style="color:#f92672">volumeMounts&lt;/span>:
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
-&lt;span style="color:#f92672">mountPath&lt;/span>: &lt;span style="color:#ae81ff">/var/lib/registry&lt;/span>
-&lt;span style="color:#f92672">volumes&lt;/span>:
-- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
-&lt;span style="color:#f92672">hostPath&lt;/span>:
-&lt;span style="color:#f92672">type&lt;/span>: &lt;span style="color:#ae81ff">Directory&lt;/span>
-&lt;span style="color:#f92672">path&lt;/span>: &lt;span style="color:#ae81ff">/mnt/exthdd/registry&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>これをデプロイして、外からpull &amp;amp; pushしてみる&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">sudo docker pull hello-world
-sudo docker tag hello-world kisaragi.local:5000/hello-world
-sudo docker push kisaragi.local:5000/hello-world
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>動いた！&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">apiVersion&lt;/span>: &lt;span style="color:#ae81ff">apps/v1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">kind&lt;/span>: &lt;span style="color:#ae81ff">Deployment&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">replicas&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">app&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">hostNetwork&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">tolerations&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">key&lt;/span>: &lt;span style="color:#ae81ff">node-role.kubernetes.io/master&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">effect&lt;/span>: &lt;span style="color:#ae81ff">NoSchedule&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">nodeSelector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">kubernetes.io/hostname&lt;/span>: &lt;span style="color:#ae81ff">kisaragi&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">docker-registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">registry:2.7.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">containerPort&lt;/span>: &lt;span style="color:#ae81ff">5000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">volumeMounts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">mountPath&lt;/span>: &lt;span style="color:#ae81ff">/var/lib/registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">volumes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">hostPath&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">type&lt;/span>: &lt;span style="color:#ae81ff">Directory&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">path&lt;/span>: &lt;span style="color:#ae81ff">/mnt/exthdd/registry&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>これをデプロイして、外からpull &amp;amp; pushしてみる&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>sudo docker pull hello-world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo docker tag hello-world kisaragi.local:5000/hello-world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sudo docker push kisaragi.local:5000/hello-world
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>動いた！&lt;/strong>&lt;/p>
 &lt;h2 id="その他もろもろ">その他もろもろ&lt;/h2>
 &lt;h3 id="つらかったこと">つらかったこと&lt;/h3>
 &lt;ul>
@@ -422,35 +617,38 @@ sudo docker push kisaragi.local:5000/hello-world
 &lt;/ul>
 &lt;h3 id="まずは定期的に再起動するように">まずは定期的に再起動するように&lt;/h3>
 &lt;h4 id="再起動用のサービスユニットを作る">再起動用のサービスユニットを作る&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-restart-ark-dedicated.service" data-lang="restart-ark-dedicated.service">&lt;span style="color:#66d9ef">[Unit]&lt;/span>
-&lt;span style="color:#a6e22e">Description&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Restart ark-dedicated.service&lt;/span>
-&lt;span style="color:#66d9ef">[Service]&lt;/span>
-&lt;span style="color:#a6e22e">Type&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">oneshot&lt;/span>
-&lt;span style="color:#a6e22e">ExecStart&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">/bin/systemctl try-restart ark-dedicated.service&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="タイマーユニットを作る">タイマーユニットを作る&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-restart-ark-dedicated.service" data-lang="restart-ark-dedicated.service">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">[Unit]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Description&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Restart ark-dedicated.service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">[Service]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Type&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">oneshot&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">ExecStart&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">/bin/systemctl try-restart ark-dedicated.service&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="タイマーユニットを作る">タイマーユニットを作る&lt;/h4>
 &lt;p>今回は誰も遊んでいないであろう毎週水曜日正午に再起動処理を実行することにします。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-restart-ark-dedicated.timer" data-lang="restart-ark-dedicated.timer">&lt;span style="color:#66d9ef">[Unit]&lt;/span>
-&lt;span style="color:#a6e22e">Description&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Restart ark-dedicated.service every wednesday&lt;/span>
-&lt;span style="color:#66d9ef">[Timer]&lt;/span>
-&lt;span style="color:#a6e22e">OnCalendar&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Wed 12:00&lt;/span>
-&lt;span style="color:#a6e22e">Persistent&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">True&lt;/span>
-&lt;span style="color:#66d9ef">[Install]&lt;/span>
-&lt;span style="color:#a6e22e">WantedBy&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">timers.target&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="webhookで通知する">webhookで通知する&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-restart-ark-dedicated.timer" data-lang="restart-ark-dedicated.timer">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">[Unit]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Description&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Restart ark-dedicated.service every wednesday&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">[Timer]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">OnCalendar&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">Wed 12:00&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Persistent&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">True&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">[Install]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">WantedBy&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">timers.target&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="webhookで通知する">webhookで通知する&lt;/h3>
 &lt;p>いちいち再起動するよーとかしたよーとか言うのもめんどうなので。&lt;/p>
 &lt;h4 id="まずは試してみる">まずは試してみる&lt;/h4>
 &lt;p>&lt;code>通知をしたいDiscordサーバのサーバ設定→ウェブフック&lt;/code>からウェブフックを作り、webhook URLを取得します。&lt;/p>
 &lt;p>とりあえず下記コマンドで雑にメッセージを投げてみる。&lt;/p>
-&lt;pre tabindex="0">&lt;code>curl -X POST -H 'Content-Type: application/json' -d '{&amp;quot;content&amp;quot; : &amp;quot;test&amp;quot;}' webhookのurl
+&lt;pre tabindex="0">&lt;code>curl -X POST -H &amp;#39;Content-Type: application/json&amp;#39; -d &amp;#39;{&amp;#34;content&amp;#34; : &amp;#34;test&amp;#34;}&amp;#39; webhookのurl
 &lt;/code>&lt;/pre>&lt;h4 id="再起動の開始と終了に合わせて通知を飛ばす">再起動の開始と終了に合わせて通知を飛ばす&lt;/h4>
 &lt;p>&lt;code>restart-ark-dedicated.service&lt;/code>を再び編集し、&lt;code>ExecStartPre&lt;/code>で&lt;code>ExecStart&lt;/code>の実行前に、&lt;code>ExecStartPost&lt;/code>で&lt;code>ExecStart&lt;/code>の実行後に走らせるコマンドをそれぞれ指定します。&lt;/p>
 &lt;pre tabindex="0">&lt;code class="language-restart-ark-dedicated.service(編集後)" data-lang="restart-ark-dedicated.service(編集後)">[Unit]
 Description=Restart ark-dedicated.service
 [Service]
 Type=oneshot
-ExecStartPre=/usr/bin/curl -X POST -H 'Content-Type: application/json' -d '{&amp;quot;content&amp;quot; : &amp;quot;[定期]サーバ再起動開始&amp;quot;}' webhookのurl
+ExecStartPre=/usr/bin/curl -X POST -H &amp;#39;Content-Type: application/json&amp;#39; -d &amp;#39;{&amp;#34;content&amp;#34; : &amp;#34;[定期]サーバ再起動開始&amp;#34;}&amp;#39; webhookのurl
 ExecStart=/bin/systemctl try-restart ark-dedicated.service
-ExecStartPost=/usr/bin/curl -X POST -H 'Content-Type: application/json' -d '{&amp;quot;content&amp;quot; : &amp;quot;[定期]サーバ再起動完了&amp;quot;}' webhookのurl
+ExecStartPost=/usr/bin/curl -X POST -H &amp;#39;Content-Type: application/json&amp;#39; -d &amp;#39;{&amp;#34;content&amp;#34; : &amp;#34;[定期]サーバ再起動完了&amp;#34;}&amp;#39; webhookのurl
 &lt;/code>&lt;/pre>&lt;h3 id="おわりに">おわりに&lt;/h3>
 &lt;p>このままだと再起動開始通知から速攻で再起動処理が動くのであんまりよくない。
 人に優しくありたいなら30分とか1時間前に通知するようにしましょう。&lt;/p>

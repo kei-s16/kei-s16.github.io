@@ -1,340 +1,105 @@
-<!doctype html><html lang=ja>
-<head>
-<title>k8s Cluster on Raspberry Pi :: blog</title>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="tl;dr archlinuxarmベースなk8sクラスタをRaspberry Pi * 4で作った時の記録">
-<meta name=keywords content>
-<meta name=robots content="noodp">
-<link rel=canonical href=/posts/k8s-cluster-on-raspberry-pi/>
-<link rel=stylesheet href=/assets/style.css>
-<link rel=stylesheet href=/assets/blue.css>
-<link rel=apple-touch-icon href=/img/apple-touch-icon-192x192.png>
-<link rel="shortcut icon" href=/img/favicon/blue.png>
-<meta name=twitter:card content="summary">
-<meta name=twitter:site content>
-<meta name=twitter:creator content="_kei_s">
-<meta property="og:locale" content="ja">
-<meta property="og:type" content="article">
-<meta property="og:title" content="k8s Cluster on Raspberry Pi">
-<meta property="og:description" content="tl;dr archlinuxarmベースなk8sクラスタをRaspberry Pi * 4で作った時の記録">
-<meta property="og:url" content="/posts/k8s-cluster-on-raspberry-pi/">
-<meta property="og:site_name" content="blog">
-<meta property="og:image" content="/">
-<meta property="og:image:width" content="2048">
-<meta property="og:image:height" content="1024">
-<meta property="article:section" content="技術">
-<meta property="article:published_time" content="2021-02-10 20:00:00 +0900 +0900">
-</head>
-<body class=blue>
-<div class="container center headings--one-size">
-<header class=header>
-<div class=header__inner>
-<div class=header__logo>
-<a href=/>
-<div class=logo>
-blog
-</div>
-</a>
-</div>
-<div class=menu-trigger>menu</div>
-</div>
-<nav class=menu>
-<ul class="menu__inner menu__inner--desktop">
-<li><a href=/categories>カテゴリ</a></li>
-<li><a href=/tags>タグ</a></li>
-<li><a href=/archives>月別アーカイブ</a></li>
-</ul>
-<ul class="menu__inner menu__inner--mobile">
-<li><a href=/categories>カテゴリ</a></li>
-<li><a href=/tags>タグ</a></li>
-<li><a href=/archives>月別アーカイブ</a></li>
-</ul>
-</nav>
-</header>
-<div class=content>
-<div class=post>
-<h1 class=post-title>
-<a href=/posts/k8s-cluster-on-raspberry-pi/>k8s Cluster on Raspberry Pi</a></h1>
-<div class=post-meta>
-<span class=post-date>
-2021-02-10
-</span>
-<span class=post-author>:: kei</span>
-</div>
-<span class=post-tags>
-#<a href=/tags/raspberrypi/>raspberrypi</a>&nbsp;
+<!doctype html><html lang=ja><head><title>k8s Cluster on Raspberry Pi :: blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="tl;dr archlinuxarmベースなk8sクラスタをRaspberry Pi * 4で作った時の記録"><meta name=keywords content><meta name=robots content="noodp"><link rel=canonical href=/posts/k8s-cluster-on-raspberry-pi/><link rel=stylesheet href=/assets/style.css><link rel=stylesheet href=/assets/blue.css><link rel=apple-touch-icon href=/img/apple-touch-icon-192x192.png><link rel="shortcut icon" href=/img/favicon/blue.png><meta name=twitter:card content="summary"><meta name=twitter:site content><meta name=twitter:creator content="_kei_s"><meta property="og:locale" content="ja"><meta property="og:type" content="article"><meta property="og:title" content="k8s Cluster on Raspberry Pi"><meta property="og:description" content="tl;dr archlinuxarmベースなk8sクラスタをRaspberry Pi * 4で作った時の記録"><meta property="og:url" content="/posts/k8s-cluster-on-raspberry-pi/"><meta property="og:site_name" content="blog"><meta property="og:image" content="/"><meta property="og:image:width" content="2048"><meta property="og:image:height" content="1024"><meta property="article:section" content="技術"><meta property="article:published_time" content="2021-02-10 20:00:00 +0900 +0900"></head><body class=blue><div class="container center headings--one-size"><header class=header><div class=header__inner><div class=header__logo><a href=/><div class=logo>blog</div></a></div><div class=menu-trigger>menu</div></div><nav class=menu><ul class="menu__inner menu__inner--desktop"><li><a href=/categories>カテゴリ</a></li><li><a href=/tags>タグ</a></li><li><a href=/archives>月別アーカイブ</a></li></ul><ul class="menu__inner menu__inner--mobile"><li><a href=/categories>カテゴリ</a></li><li><a href=/tags>タグ</a></li><li><a href=/archives>月別アーカイブ</a></li></ul></nav></header><div class=content><div class=post><h1 class=post-title><a href=/posts/k8s-cluster-on-raspberry-pi/>k8s Cluster on Raspberry Pi</a></h1><div class=post-meta><span class=post-date>2021-02-10</span>
+<span class=post-author>:: kei</span></div><span class=post-tags>#<a href=/tags/raspberrypi/>raspberrypi</a>&nbsp;
 #<a href=/tags/k8s/>k8s</a>&nbsp;
-#<a href=/tags/archlinuxarm/>archlinuxarm</a>&nbsp;
-</span>
-<div class=post-content><div>
-<p><a href=https://gist.github.com/kei-s16/91cc87b127f38cfed28fe625ae8c9ba9>kei-s16/k8s-arch-rpi-cluster.md</a> を元に加筆・修正を行ったものです<br>
-基本的に2021年頭の情報になっており、すでに時代遅れであったり、間違いに気づいて実際の運用では改善済のものが記事には含まれています</p>
-<hr>
-<h2 id=なにやったのか>なにやったのか？<a href=#なにやったのか class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<p>rpi4 * 3 で k8s クラスタを作る</p>
-<h2 id=構成>構成<a href=#構成 class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<ul>
-<li>rpi 4 (4GB)
-<ul>
-<li>Arch Linux (ARM)</li>
-</ul>
-</li>
-</ul>
-<h2 id=作業環境>作業環境<a href=#作業環境 class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<h3 id=raspbianイメージ焼くところ>Raspbianイメージ焼くところ<a href=#raspbianイメージ焼くところ class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<p>Windowsの世界</p>
-<h3 id=もろもろの雑用>もろもろの雑用<a href=#もろもろの雑用 class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<p>Arch on WSL2</p>
-<pre tabindex=0><code>kei@Win-Desktop-wsl
+#<a href=/tags/archlinuxarm/>archlinuxarm</a>&nbsp;</span><div class=post-content><div><p><a href=https://gist.github.com/kei-s16/91cc87b127f38cfed28fe625ae8c9ba9>kei-s16/k8s-arch-rpi-cluster.md</a> を元に加筆・修正を行ったものです<br>基本的に2021年頭の情報になっており、すでに時代遅れであったり、間違いに気づいて実際の運用では改善済のものが記事には含まれています</p><hr><h2 id=なにやったのか>なにやったのか？<a href=#なにやったのか class=hanchor arialabel=Anchor>&#8983;</a></h2><p>rpi4 * 3 で k8s クラスタを作る</p><h2 id=構成>構成<a href=#構成 class=hanchor arialabel=Anchor>&#8983;</a></h2><ul><li>rpi 4 (4GB)<ul><li>Arch Linux (ARM)</li></ul></li></ul><h2 id=作業環境>作業環境<a href=#作業環境 class=hanchor arialabel=Anchor>&#8983;</a></h2><h3 id=raspbianイメージ焼くところ>Raspbianイメージ焼くところ<a href=#raspbianイメージ焼くところ class=hanchor arialabel=Anchor>&#8983;</a></h3><p>Windowsの世界</p><h3 id=もろもろの雑用>もろもろの雑用<a href=#もろもろの雑用 class=hanchor arialabel=Anchor>&#8983;</a></h3><p>Arch on WSL2</p><pre tabindex=0><code>kei@Win-Desktop-wsl
 OS: Arch Linux on Windows 10 x86_64
 Kernel: 5.4.72-microsoft-standard-WSL2
 Shell: zsh 5.8
 CPU: AMD Ryzen 7 3800X (16) @ 3.892GHz
 Memory: 279MiB / 12733MiB
-</code></pre><h3 id=archlinux-for-arm64がんばるところ>ArchLinux for ARM64がんばるところ<a href=#archlinux-for-arm64がんばるところ class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<p>Raspbian(32bit)</p>
-<h3 id=kubernetesがんばるところ>Kubernetesがんばるところ<a href=#kubernetesがんばるところ class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<p>ArchLinux ARM(64bit) on Raspberry Pi</p>
-<h2 id=作業手順>作業手順<a href=#作業手順 class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<h3 id=下準備フェイズ>下準備フェイズ<a href=#下準備フェイズ class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<ol>
-<li>組み立てやってテンション上げる</li>
-<li>メインのLANにぶらさげるLANのセットアップ</li>
-<li>Raspbian を headlessでインストール
-<ol>
-<li>ルータに有線で接続してssh
-<ol>
-<li>新ユーザ作ってpiユーザ消す</li>
-<li>パスワード→鍵認証はやらない(raspbianをこのあと使わないので)</li>
-</ol>
-</li>
-</ol>
-</li>
-<li>Raspbian 上 で ArchLinux ARM を焼く</li>
-</ol>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=color:#75715e># $はすべて sudo</span>
-$ fdisk /dev/sda
-<span style=color:#75715e># いいかんじにパーティション切る</span>
-
-$ mkfs.vfat /dev/sda1
-$ mkdir boot
-$ mount /dev/sda1 boot
-
-$ mkfs.ext4 /dev/sda2
-$ mkdir root
-$ mount /dev/sda2 root
-
-<span style=color:#75715e># イメージ落とす</span>
-$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
-
-<span style=color:#75715e># ここから先はsuする</span>
-$ su
-% bsdtar -xpf ArchLinuxARM-rpi-4-latest.tar.gz -C root
-% sync
-
-<span style=color:#75715e># 64bit かつ rpi4 なので</span>
-% sed -i <span style=color:#e6db74>&#39;s/mmcblk0/mmcblk1/g&#39;</span> root/etc/fstab
-
-% mv root/boot/* boot
-
-<span style=color:#75715e># マウントしたらちゃんとアンマウントしようね</span>
-% umount boot root
-
-<span style=color:#75715e># これを3セット (さらに別用途で+1セットやったのは秘密)</span>
-</code></pre></div><h3 id=本作業フェイズ>本作業フェイズ<a href=#本作業フェイズ class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<h4 id=各マシンにホスト名ふったりユーザ作ったり>各マシンにホスト名ふったりユーザ作ったり<a href=#各マシンにホスト名ふったりユーザ作ったり class=hanchor arialabel=Anchor>&#8983;</a> </h4>
-<ul>
-<li><code>pacman -Syyu</code> めっちゃ重い(国内ミラーなさそう)</li>
-<li><code>pacman -S sudo</code></li>
-<li>ホスト名変えた
-<ul>
-<li>kisaragi</li>
-<li>mogami</li>
-<li>kumano</li>
-</ul>
-</li>
-<li>sudoersいじった</li>
-<li>公開鍵認証以外封じた</li>
-</ul>
-<h4 id=kubernetesまわりガーっとインストール>Kubernetesまわりガーっとインストール<a href=#kubernetesまわりガーっとインストール class=hanchor arialabel=Anchor>&#8983;</a> </h4>
-<ul>
-<li>Ansibleでやろうとしたが、pacmanだけでなくyayも使うのでちょっと厳しかった
-<ul>
-<li>ので横着してシェルスクリプト書いたが横着しすぎてコケた
-<ul>
-<li>ので最終的に半手作業……</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=color:#75715e>#!/bin/bash -eu
-</span><span style=color:#75715e></span>pacman -S git base base-devel --noconfirm
-mkdir ~/build/
-cd ~/build
-git clone https://aur.archlinux.org/yay.git
-cd ~/build/yay
-makepkg -si --noconfirm
-cd ~/
-yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntrack-tools cni-plugins --noconfirm
-</code></pre></div><h4 id=kubernetesセットアップ>Kubernetesセットアップ<a href=#kubernetesセットアップ class=hanchor arialabel=Anchor>&#8983;</a> </h4>
-<h5 id=全体構成>全体構成<a href=#全体構成 class=hanchor arialabel=Anchor>&#8983;</a> </h5>
-<ul>
-<li>kisaragi : Master</li>
-<li>mogami : node</li>
-<li>kumano : node</li>
-</ul>
-<p>お船じゃないよ</p>
-<h5 id=kisaragiのセットアップ前半戦>kisaragiのセットアップ前半戦<a href=#kisaragiのセットアップ前半戦 class=hanchor arialabel=Anchor>&#8983;</a> </h5>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>sudo kubeadm init --pod-network-cidr<span style=color:#f92672>=</span>10.244.0.0/16
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown <span style=color:#66d9ef>$(</span>id -u<span style=color:#66d9ef>)</span>:<span style=color:#66d9ef>$(</span>id -g<span style=color:#66d9ef>)</span> $HOME/.kube/config
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-</code></pre></div><h5 id=mogami--kumanoのセットアップ>mogami & kumanoのセットアップ<a href=#mogami--kumanoのセットアップ class=hanchor arialabel=Anchor>&#8983;</a> </h5>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>sudo systemctl enable kubelet.service
-sudo systemctl start kubelete.service
-sudo kubeadm join <span style=color:#f92672>{</span>いろんなひみつのオプション<span style=color:#f92672>}</span>
-</code></pre></div><h5 id=kisaragiのセットアップ後半戦>kisaragiのセットアップ後半戦<a href=#kisaragiのセットアップ後半戦 class=hanchor arialabel=Anchor>&#8983;</a> </h5>
-<p>クラスターにノードを参加させる</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>kubectl label node mogami node-role.kubernetes.io/worker<span style=color:#f92672>=</span>worker
-kubectl label node kumano node-role.kubernetes.io/worker<span style=color:#f92672>=</span>worker
-</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>kisaragi% kubectl version
-Client Version: version.Info<span style=color:#f92672>{</span>Major:<span style=color:#e6db74>&#34;1&#34;</span>, Minor:<span style=color:#e6db74>&#34;20&#34;</span>, GitVersion:<span style=color:#e6db74>&#34;v1.20.2&#34;</span>, GitCommit:<span style=color:#e6db74>&#34;faecb196815e248d3ecfb03c680a4507229c2a56&#34;</span>, GitTreeState:<span style=color:#e6db74>&#34;clean&#34;</span>, BuildDate:<span style=color:#e6db74>&#34;2021-01-13T13:28:09Z&#34;</span>, GoVersion:<span style=color:#e6db74>&#34;go1.15.5&#34;</span>, Compiler:<span style=color:#e6db74>&#34;gc&#34;</span>, Platform:<span style=color:#e6db74>&#34;linux/arm64&#34;</span><span style=color:#f92672>}</span>
-Server Version: version.Info<span style=color:#f92672>{</span>Major:<span style=color:#e6db74>&#34;1&#34;</span>, Minor:<span style=color:#e6db74>&#34;20&#34;</span>, GitVersion:<span style=color:#e6db74>&#34;v1.20.2&#34;</span>, GitCommit:<span style=color:#e6db74>&#34;faecb196815e248d3ecfb03c680a4507229c2a56&#34;</span>, GitTreeState:<span style=color:#e6db74>&#34;clean&#34;</span>, BuildDate:<span style=color:#e6db74>&#34;2021-01-13T13:20:00Z&#34;</span>, GoVersion:<span style=color:#e6db74>&#34;go1.15.5&#34;</span>, Compiler:<span style=color:#e6db74>&#34;gc&#34;</span>, Platform:<span style=color:#e6db74>&#34;linux/arm64&#34;</span><span style=color:#f92672>}}}</span>
-</code></pre></div><h4 id=なんかpod動かしてみる>なんかpod動かしてみる<a href=#なんかpod動かしてみる class=hanchor arialabel=Anchor>&#8983;</a> </h4>
-<p>オレオレDocker Registry置くことにした</p>
-<p>deployment.yml</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml>---
-<span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>apps/v1</span>
-<span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Deployment</span>
-<span style=color:#f92672>metadata</span>:
-  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>docker-registry</span>
-  <span style=color:#f92672>labels</span>:
-    <span style=color:#f92672>app</span>: <span style=color:#ae81ff>docker-registry</span>
-<span style=color:#f92672>spec</span>:
-  <span style=color:#f92672>replicas</span>: <span style=color:#ae81ff>1</span>
-  <span style=color:#f92672>selector</span>:
-    <span style=color:#f92672>matchLabels</span>:
-      <span style=color:#f92672>app</span>: <span style=color:#ae81ff>docker-registry</span>
-  <span style=color:#f92672>template</span>:
-    <span style=color:#f92672>metadata</span>:
-      <span style=color:#f92672>labels</span>:
-        <span style=color:#f92672>app</span>: <span style=color:#ae81ff>docker-registry</span>
-    <span style=color:#f92672>spec</span>:
-      <span style=color:#f92672>hostNetwork</span>: <span style=color:#66d9ef>true</span>
-      <span style=color:#f92672>tolerations</span>:
-      - <span style=color:#f92672>key</span>: <span style=color:#ae81ff>node-role.kubernetes.io/master</span>
-        <span style=color:#f92672>effect</span>: <span style=color:#ae81ff>NoSchedule</span>
-      <span style=color:#f92672>nodeSelector</span>:
-        <span style=color:#f92672>kubernetes.io/hostname</span>: <span style=color:#ae81ff>kisaragi</span>
-      <span style=color:#f92672>containers</span>:
-      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>docker-registry</span>
-        <span style=color:#f92672>image</span>: <span style=color:#ae81ff>registry:2.7.1</span>
-        <span style=color:#f92672>ports</span>:
-        - <span style=color:#f92672>containerPort</span>: <span style=color:#ae81ff>5000</span>
-        <span style=color:#f92672>volumeMounts</span>:
-        - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>registry</span>
-          <span style=color:#f92672>mountPath</span>: <span style=color:#ae81ff>/var/lib/registry</span>
-      <span style=color:#f92672>volumes</span>:
-      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>registry</span>
-        <span style=color:#f92672>hostPath</span>:
-          <span style=color:#f92672>type</span>: <span style=color:#ae81ff>Directory</span>
-          <span style=color:#f92672>path</span>: <span style=color:#ae81ff>/mnt/exthdd/registry</span>
-</code></pre></div><p>これをデプロイして、外からpull & pushしてみる</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>sudo docker pull hello-world
-sudo docker tag hello-world kisaragi.local:5000/hello-world
-sudo docker push kisaragi.local:5000/hello-world
-</code></pre></div><p><strong>動いた！</strong></p>
-<h2 id=その他もろもろ>その他もろもろ<a href=#その他もろもろ class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<h3 id=つらかったこと>つらかったこと<a href=#つらかったこと class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<ul>
-<li>アップデートで再起動かけたら <code>kubectl</code> コケた
-<ul>
-<li>masterで <code>systemctl enable kubelet</code> 忘れてた</li>
-</ul>
-</li>
-<li>一瞬世界から孤立したサーバを産み落としてしまった
-<ul>
-<li><code>~/.ssh/authorized_keys</code> を消してしまった</li>
-<li>別マシンでSDカードをマウントして <code>authorized_keys</code> を作ることでごまかした
-<ul>
-<li><code>chmod {ユーザ名}:sudo authorized_keys</code> 忘れずにね</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id=やらなかったこと今後やりたいこと>やらなかったこと(今後やりたいこと)<a href=#やらなかったこと今後やりたいこと class=hanchor arialabel=Anchor>&#8983;</a> </h3>
-<ul>
-<li>PoE(USBケーブル邪魔じゃね？)</li>
-<li>ノード台数の拡張</li>
-<li>無線LANルータがちょっと残念だったので改善
-<ul>
-<li>ラズパイルータにしちゃう</li>
-</ul>
-</li>
-</ul>
-<h2 id=結論>結論<a href=#結論 class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<ul>
-<li>ArchLinuxはいいぞ</li>
-<li>k8sはいいぞ</li>
-<li>横着はよくないぞ</li>
-</ul>
-<h2 id=参考記事>参考記事<a href=#参考記事 class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<ul>
-<li><a href=https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4>Raspberry Pi 4 | ArchLinux ARM</a></li>
-<li><a href=https://qiita.com/tomotomo/items/2ff445377c13f9db38e2>Raspberry Pi 4 のMACアドレスの範囲が変わったぞ</a></li>
-<li><a href=https://developers.cyberagent.co.jp/blog/archives/14721/>3日間クッキング【Kubernetes のラズペリーパイ包み　“サイバーエージェント風】</a></li>
-<li><a href=https://qiita.com/go_vargo/items/d1271ab60f2bba375dcc>Raspberry PiでおうちKubernetes構築【物理編】</a></li>
-<li><a href=https://qiita.com/go_vargo/items/29f6d832ea0a289b4778>Raspberry PiでおうちKubernetes構築【論理編】</a></li>
-<li><a href=https://qiita.com/temeteke/items/04960c96edee113bd053>Raspberry Pi 4とArch Linux(64bit)で作るKubernetesクラスタ)</a></li>
-<li><a href=https://sminamot-dev.hatenablog.com/entry/2020/01/26/111949>Raspberry Pi 4 でおうちk8sクラスタを構築する</a></li>
-<li><a href=https://qiita.com/yuyakato/items/c5b1b1293c5879e231ab>おうちk8sクラスタを作る: Dockerレジストリ編</a></li>
-</ul>
-<hr>
-<h2 id=補足>補足<a href=#補足 class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<p>重要なものだけ補足</p>
-<blockquote>
-<p>pacman -Syyu めっちゃ重い(国内ミラーなさそう)</p>
-</blockquote>
-<p>という記述がありましたが、2021/11/18にAsahi Linuxが国内ミラーを作成してくれました！</p>
-<blockquote class=twitter-tweet><p lang=en dir=ltr>We noticed that there was no Arch Linux ARM mirror in Japan, so we're sponsoring one now 😊<br><br>If you're in Japan or nearby, feel free to point your pacman.d/mirrorlist at <a href=https://t.co/GM69rZE3tC>https://t.co/GM69rZE3tC</a>!<a href=https://t.co/erKHtHwFfX>https://t.co/erKHtHwFfX</a> <a href=https://t.co/m0opnupc5i>pic.twitter.com/m0opnupc5i</a></p>&mdash; Asahi Linux (@AsahiLinux) <a href="https://twitter.com/AsahiLinux/status/1461268746878656513?ref_src=twsrc%5Etfw">November 18, 2021</a></blockquote>
-<script async src=https://platform.twitter.com/widgets.js></script>
-</div></div>
-<div class=pagination>
-<div class=pagination__title>
-<span class=pagination__title-h>read other posts</span>
-<hr>
-</div>
-<div class=pagination__buttons>
-<span class="button previous">
-<a href=/posts/furikaeri-2021/>
-<span class=button__icon>←</span>
-<span class=button__text>2021年のふりかえり</span>
-</a>
-</span>
-<span class="button next">
-<a href=/posts/use-systemd-timer-instead-of-crond/>
-<span class=button__text>systemctl timer unitを使ってcronを置き換えたときのメモ</span>
-<span class=button__icon>→</span>
-</a>
-</span>
-</div>
-</div>
-</div>
-</div>
-<footer class=footer>
-<div class=footer__inner>
-<div class=copyright>
-<span>© 2022 Powered by <a href=http://gohugo.io>Hugo</a></span>
-<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span>
-</div>
-</div>
-</footer>
-<script src=/assets/main.js></script>
-<script src=/assets/prism.js></script>
-</div>
-</body>
-</html>
+</code></pre><h3 id=archlinux-for-arm64がんばるところ>ArchLinux for ARM64がんばるところ<a href=#archlinux-for-arm64がんばるところ class=hanchor arialabel=Anchor>&#8983;</a></h3><p>Raspbian(32bit)</p><h3 id=kubernetesがんばるところ>Kubernetesがんばるところ<a href=#kubernetesがんばるところ class=hanchor arialabel=Anchor>&#8983;</a></h3><p>ArchLinux ARM(64bit) on Raspberry Pi</p><h2 id=作業手順>作業手順<a href=#作業手順 class=hanchor arialabel=Anchor>&#8983;</a></h2><h3 id=下準備フェイズ>下準備フェイズ<a href=#下準備フェイズ class=hanchor arialabel=Anchor>&#8983;</a></h3><ol><li>組み立てやってテンション上げる</li><li>メインのLANにぶらさげるLANのセットアップ</li><li>Raspbian を headlessでインストール<ol><li>ルータに有線で接続してssh<ol><li>新ユーザ作ってpiユーザ消す</li><li>パスワード→鍵認証はやらない(raspbianをこのあと使わないので)</li></ol></li></ol></li><li>Raspbian 上 で ArchLinux ARM を焼く</li></ol><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#75715e># $はすべて sudo</span>
+</span></span><span style=display:flex><span>$ fdisk /dev/sda
+</span></span><span style=display:flex><span><span style=color:#75715e># いいかんじにパーティション切る</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>$ mkfs.vfat /dev/sda1
+</span></span><span style=display:flex><span>$ mkdir boot
+</span></span><span style=display:flex><span>$ mount /dev/sda1 boot
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>$ mkfs.ext4 /dev/sda2
+</span></span><span style=display:flex><span>$ mkdir root
+</span></span><span style=display:flex><span>$ mount /dev/sda2 root
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># イメージ落とす</span>
+</span></span><span style=display:flex><span>$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ここから先はsuする</span>
+</span></span><span style=display:flex><span>$ su
+</span></span><span style=display:flex><span>% bsdtar -xpf ArchLinuxARM-rpi-4-latest.tar.gz -C root
+</span></span><span style=display:flex><span>% sync
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 64bit かつ rpi4 なので</span>
+</span></span><span style=display:flex><span>% sed -i <span style=color:#e6db74>&#39;s/mmcblk0/mmcblk1/g&#39;</span> root/etc/fstab
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>% mv root/boot/* boot
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># マウントしたらちゃんとアンマウントしようね</span>
+</span></span><span style=display:flex><span>% umount boot root
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># これを3セット (さらに別用途で+1セットやったのは秘密)</span>
+</span></span></code></pre></div><h3 id=本作業フェイズ>本作業フェイズ<a href=#本作業フェイズ class=hanchor arialabel=Anchor>&#8983;</a></h3><h4 id=各マシンにホスト名ふったりユーザ作ったり>各マシンにホスト名ふったりユーザ作ったり<a href=#各マシンにホスト名ふったりユーザ作ったり class=hanchor arialabel=Anchor>&#8983;</a></h4><ul><li><code>pacman -Syyu</code> めっちゃ重い(国内ミラーなさそう)</li><li><code>pacman -S sudo</code></li><li>ホスト名変えた<ul><li>kisaragi</li><li>mogami</li><li>kumano</li></ul></li><li>sudoersいじった</li><li>公開鍵認証以外封じた</li></ul><h4 id=kubernetesまわりガーっとインストール>Kubernetesまわりガーっとインストール<a href=#kubernetesまわりガーっとインストール class=hanchor arialabel=Anchor>&#8983;</a></h4><ul><li>Ansibleでやろうとしたが、pacmanだけでなくyayも使うのでちょっと厳しかった<ul><li>ので横着してシェルスクリプト書いたが横着しすぎてコケた<ul><li>ので最終的に半手作業……</li></ul></li></ul></li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#75715e>#!/bin/bash -eu
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>pacman -S git base base-devel --noconfirm
+</span></span><span style=display:flex><span>mkdir ~/build/
+</span></span><span style=display:flex><span>cd ~/build
+</span></span><span style=display:flex><span>git clone https://aur.archlinux.org/yay.git
+</span></span><span style=display:flex><span>cd ~/build/yay
+</span></span><span style=display:flex><span>makepkg -si --noconfirm
+</span></span><span style=display:flex><span>cd ~/
+</span></span><span style=display:flex><span>yay -S docker kubelet-bin kubeadm-bin kubectl-bin ebtables ethtool socat conntrack-tools cni-plugins --noconfirm
+</span></span></code></pre></div><h4 id=kubernetesセットアップ>Kubernetesセットアップ<a href=#kubernetesセットアップ class=hanchor arialabel=Anchor>&#8983;</a></h4><h5 id=全体構成>全体構成<a href=#全体構成 class=hanchor arialabel=Anchor>&#8983;</a></h5><ul><li>kisaragi : Master</li><li>mogami : node</li><li>kumano : node</li></ul><p>お船じゃないよ</p><h5 id=kisaragiのセットアップ前半戦>kisaragiのセットアップ前半戦<a href=#kisaragiのセットアップ前半戦 class=hanchor arialabel=Anchor>&#8983;</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>sudo kubeadm init --pod-network-cidr<span style=color:#f92672>=</span>10.244.0.0/16
+</span></span><span style=display:flex><span>mkdir -p $HOME/.kube
+</span></span><span style=display:flex><span>sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+</span></span><span style=display:flex><span>sudo chown <span style=color:#66d9ef>$(</span>id -u<span style=color:#66d9ef>)</span>:<span style=color:#66d9ef>$(</span>id -g<span style=color:#66d9ef>)</span> $HOME/.kube/config
+</span></span><span style=display:flex><span>kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+</span></span></code></pre></div><h5 id=mogami--kumanoのセットアップ>mogami & kumanoのセットアップ<a href=#mogami--kumanoのセットアップ class=hanchor arialabel=Anchor>&#8983;</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>sudo systemctl enable kubelet.service
+</span></span><span style=display:flex><span>sudo systemctl start kubelete.service
+</span></span><span style=display:flex><span>sudo kubeadm join <span style=color:#f92672>{</span>いろんなひみつのオプション<span style=color:#f92672>}</span>
+</span></span></code></pre></div><h5 id=kisaragiのセットアップ後半戦>kisaragiのセットアップ後半戦<a href=#kisaragiのセットアップ後半戦 class=hanchor arialabel=Anchor>&#8983;</a></h5><p>クラスターにノードを参加させる</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>kubectl label node mogami node-role.kubernetes.io/worker<span style=color:#f92672>=</span>worker
+</span></span><span style=display:flex><span>kubectl label node kumano node-role.kubernetes.io/worker<span style=color:#f92672>=</span>worker
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>kisaragi% kubectl version
+</span></span><span style=display:flex><span>Client Version: version.Info<span style=color:#f92672>{</span>Major:<span style=color:#e6db74>&#34;1&#34;</span>, Minor:<span style=color:#e6db74>&#34;20&#34;</span>, GitVersion:<span style=color:#e6db74>&#34;v1.20.2&#34;</span>, GitCommit:<span style=color:#e6db74>&#34;faecb196815e248d3ecfb03c680a4507229c2a56&#34;</span>, GitTreeState:<span style=color:#e6db74>&#34;clean&#34;</span>, BuildDate:<span style=color:#e6db74>&#34;2021-01-13T13:28:09Z&#34;</span>, GoVersion:<span style=color:#e6db74>&#34;go1.15.5&#34;</span>, Compiler:<span style=color:#e6db74>&#34;gc&#34;</span>, Platform:<span style=color:#e6db74>&#34;linux/arm64&#34;</span><span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>Server Version: version.Info<span style=color:#f92672>{</span>Major:<span style=color:#e6db74>&#34;1&#34;</span>, Minor:<span style=color:#e6db74>&#34;20&#34;</span>, GitVersion:<span style=color:#e6db74>&#34;v1.20.2&#34;</span>, GitCommit:<span style=color:#e6db74>&#34;faecb196815e248d3ecfb03c680a4507229c2a56&#34;</span>, GitTreeState:<span style=color:#e6db74>&#34;clean&#34;</span>, BuildDate:<span style=color:#e6db74>&#34;2021-01-13T13:20:00Z&#34;</span>, GoVersion:<span style=color:#e6db74>&#34;go1.15.5&#34;</span>, Compiler:<span style=color:#e6db74>&#34;gc&#34;</span>, Platform:<span style=color:#e6db74>&#34;linux/arm64&#34;</span><span style=color:#f92672>}}}</span>
+</span></span></code></pre></div><h4 id=なんかpod動かしてみる>なんかpod動かしてみる<a href=#なんかpod動かしてみる class=hanchor arialabel=Anchor>&#8983;</a></h4><p>オレオレDocker Registry置くことにした</p><p>deployment.yml</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml><span style=display:flex><span>---
+</span></span><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>apps/v1</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Deployment</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>docker-registry</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>labels</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>app</span>: <span style=color:#ae81ff>docker-registry</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>replicas</span>: <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>selector</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>matchLabels</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>app</span>: <span style=color:#ae81ff>docker-registry</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>template</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>metadata</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>labels</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>app</span>: <span style=color:#ae81ff>docker-registry</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>spec</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>hostNetwork</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>tolerations</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>key</span>: <span style=color:#ae81ff>node-role.kubernetes.io/master</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>effect</span>: <span style=color:#ae81ff>NoSchedule</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>nodeSelector</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>kubernetes.io/hostname</span>: <span style=color:#ae81ff>kisaragi</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>containers</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>docker-registry</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>image</span>: <span style=color:#ae81ff>registry:2.7.1</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>ports</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#f92672>containerPort</span>: <span style=color:#ae81ff>5000</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>volumeMounts</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>registry</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>mountPath</span>: <span style=color:#ae81ff>/var/lib/registry</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>registry</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>hostPath</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>type</span>: <span style=color:#ae81ff>Directory</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>path</span>: <span style=color:#ae81ff>/mnt/exthdd/registry</span>
+</span></span></code></pre></div><p>これをデプロイして、外からpull & pushしてみる</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>sudo docker pull hello-world
+</span></span><span style=display:flex><span>sudo docker tag hello-world kisaragi.local:5000/hello-world
+</span></span><span style=display:flex><span>sudo docker push kisaragi.local:5000/hello-world
+</span></span></code></pre></div><p><strong>動いた！</strong></p><h2 id=その他もろもろ>その他もろもろ<a href=#その他もろもろ class=hanchor arialabel=Anchor>&#8983;</a></h2><h3 id=つらかったこと>つらかったこと<a href=#つらかったこと class=hanchor arialabel=Anchor>&#8983;</a></h3><ul><li>アップデートで再起動かけたら <code>kubectl</code> コケた<ul><li>masterで <code>systemctl enable kubelet</code> 忘れてた</li></ul></li><li>一瞬世界から孤立したサーバを産み落としてしまった<ul><li><code>~/.ssh/authorized_keys</code> を消してしまった</li><li>別マシンでSDカードをマウントして <code>authorized_keys</code> を作ることでごまかした<ul><li><code>chmod {ユーザ名}:sudo authorized_keys</code> 忘れずにね</li></ul></li></ul></li></ul><h3 id=やらなかったこと今後やりたいこと>やらなかったこと(今後やりたいこと)<a href=#やらなかったこと今後やりたいこと class=hanchor arialabel=Anchor>&#8983;</a></h3><ul><li>PoE(USBケーブル邪魔じゃね？)</li><li>ノード台数の拡張</li><li>無線LANルータがちょっと残念だったので改善<ul><li>ラズパイルータにしちゃう</li></ul></li></ul><h2 id=結論>結論<a href=#結論 class=hanchor arialabel=Anchor>&#8983;</a></h2><ul><li>ArchLinuxはいいぞ</li><li>k8sはいいぞ</li><li>横着はよくないぞ</li></ul><h2 id=参考記事>参考記事<a href=#参考記事 class=hanchor arialabel=Anchor>&#8983;</a></h2><ul><li><a href=https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4>Raspberry Pi 4 | ArchLinux ARM</a></li><li><a href=https://qiita.com/tomotomo/items/2ff445377c13f9db38e2>Raspberry Pi 4 のMACアドレスの範囲が変わったぞ</a></li><li><a href=https://developers.cyberagent.co.jp/blog/archives/14721/>3日間クッキング【Kubernetes のラズペリーパイ包み　“サイバーエージェント風】</a></li><li><a href=https://qiita.com/go_vargo/items/d1271ab60f2bba375dcc>Raspberry PiでおうちKubernetes構築【物理編】</a></li><li><a href=https://qiita.com/go_vargo/items/29f6d832ea0a289b4778>Raspberry PiでおうちKubernetes構築【論理編】</a></li><li><a href=https://qiita.com/temeteke/items/04960c96edee113bd053>Raspberry Pi 4とArch Linux(64bit)で作るKubernetesクラスタ)</a></li><li><a href=https://sminamot-dev.hatenablog.com/entry/2020/01/26/111949>Raspberry Pi 4 でおうちk8sクラスタを構築する</a></li><li><a href=https://qiita.com/yuyakato/items/c5b1b1293c5879e231ab>おうちk8sクラスタを作る: Dockerレジストリ編</a></li></ul><hr><h2 id=補足>補足<a href=#補足 class=hanchor arialabel=Anchor>&#8983;</a></h2><p>重要なものだけ補足</p><blockquote><p>pacman -Syyu めっちゃ重い(国内ミラーなさそう)</p></blockquote><p>という記述がありましたが、2021/11/18にAsahi Linuxが国内ミラーを作成してくれました！</p><blockquote class=twitter-tweet><p lang=en dir=ltr>We noticed that there was no Arch Linux ARM mirror in Japan, so we're sponsoring one now 😊<br><br>If you're in Japan or nearby, feel free to point your pacman.d/mirrorlist at <a href=https://t.co/GM69rZE3tC>https://t.co/GM69rZE3tC</a>!<a href=https://t.co/erKHtHwFfX>https://t.co/erKHtHwFfX</a> <a href=https://t.co/m0opnupc5i>pic.twitter.com/m0opnupc5i</a></p>&mdash; Asahi Linux (@AsahiLinux) <a href="https://twitter.com/AsahiLinux/status/1461268746878656513?ref_src=twsrc%5Etfw">November 18, 2021</a></blockquote><script async src=https://platform.twitter.com/widgets.js></script></div></div><div class=pagination><div class=pagination__title><span class=pagination__title-h>read other posts</span><hr></div><div class=pagination__buttons><span class="button previous"><a href=/posts/furikaeri-2021/><span class=button__icon>←</span>
+<span class=button__text>2021年のふりかえり</span></a></span>
+<span class="button next"><a href=/posts/use-systemd-timer-instead-of-crond/><span class=button__text>systemctl timer unitを使ってcronを置き換えたときのメモ</span>
+<span class=button__icon>→</span></a></span></div></div></div></div><footer class=footer><div class=footer__inner><div class=copyright><span>© 2022 Powered by <a href=http://gohugo.io>Hugo</a></span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span></div></div></footer><script src=/assets/main.js></script>
+<script src=/assets/prism.js></script></div></body></html>
