@@ -3,16 +3,17 @@
 想定読者はDockerなんもわからんのでやってみながら覚えたい、ふだんはアプリを書くのがメインな人です。&lt;br>
 基本的なshellでの操作(cd, mv, cpなど)はできるものとし、また、&lt;code>Docker&lt;/code>はインストール済みのものとします。&lt;code>compose v2&lt;/code>および&lt;code>docker-compose&lt;/code>には触れません。&lt;br>
 最終的に簡単な(&lt;strong>ここ重要&lt;/strong>)スクリプト言語の実行環境を作るためのDockerfileを書くことができるようになることが目的です。
-題材にはPythonを使います。楽なので。&lt;/p>
+題材にはPythonを使います。楽なので。&lt;br>
+また、この記事で実行するコマンドはlinux上で実行されています。実行環境によって出力が異なることがありますが、その場合は適宜読み替えをお願いします。&lt;/p>
 &lt;h2 id="目次">目次&lt;/h2>
 &lt;ol>
 &lt;li>&lt;a href="#docker%E3%81%A8%E3%81%AF">Dockerとは？&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#dockerfile%E3%82%92%E6%9B%B8%E3%81%84%E3%81%A6%E3%81%84%E3%81%8F">Dockerfileを書いていく&lt;/a>
 &lt;ol>
 &lt;li>&lt;a href="#2%E8%A1%8C%E3%81%A7%E5%85%A5%E9%96%80%E3%81%99%E3%82%8B">2行で入門する&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#%E9%96%91%E8%A9%B1%E4%BC%91%E9%A1%8C--%E8%87%AA%E5%88%86%E7%94%A8%E3%81%AB%E3%82%BF%E3%82%B0%E3%82%92%E8%A8%AD%E5%AE%9A%E3%81%99%E3%82%8B">閑話休題 : 自分用にタグを設定する&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E8%87%AA%E5%88%86%E7%94%A8%E3%81%AB%E3%82%BF%E3%82%B0%E3%82%92%E8%A8%AD%E5%AE%9A%E3%81%99%E3%82%8B">自分用にタグを設定する&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#%E3%82%BD%E3%83%BC%E3%82%B9%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%92%E3%82%B3%E3%83%B3%E3%83%86%E3%83%8A%E3%81%AB%E5%90%8C%E6%A2%B1%E3%81%97%E3%81%A6%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%8B%E3%82%89%E5%AE%9F%E8%A1%8C%E3%81%A7%E3%81%8D%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB%E3%81%99%E3%82%8B">ソースファイルをコンテナに同梱して、ファイルから実行できるようにする&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#%E9%96%91%E8%A9%B1%E4%BC%91%E9%A1%8C--arg%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%81%BF%E3%82%88%E3%81%86">閑話休題 : ARGを使ってみよう&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#arg%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%81%BF%E3%82%88%E3%81%86">ARGを使ってみよう&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#pip%E3%82%92%E4%BD%BF%E3%81%86">pipを使う&lt;/a>&lt;/li>
 &lt;/ol>
 &lt;/li>
@@ -77,10 +78,16 @@ DockerにはDockerの作法があり、作法を逸脱するとわりとつら�
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% docker build -f ./Dockerfile .
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>おそらく、末尾に下記のような文言が出力されるはずです。IMAGE IDの部分を控えておいてください。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Successfully built &lt;span style="color:#f92672">{&lt;/span>IMAGE ID&lt;span style="color:#f92672">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>次に、このコマンドを実行することでコンテナが起動します。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>(ここから追記)&lt;/p>
+&lt;p>Docker for Macを使っている場合はこの部分の出力が違うそうです。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">=&lt;/span>&amp;gt; exporting to image 0.0s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">=&lt;/span>&amp;gt; &lt;span style="color:#f92672">=&lt;/span>&amp;gt; exporting layers 0.0s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">=&lt;/span>&amp;gt; &lt;span style="color:#f92672">=&lt;/span>&amp;gt; writing image &lt;span style="color:#f92672">{&lt;/span>IMAGE ID&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>(ここまで追記)&lt;/p>
+&lt;p>次に、このコマンドを実行することでコンテナが起動します。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% docker run &lt;span style="color:#f92672">{&lt;/span>IMAGE ID&lt;span style="color:#f92672">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>どうですか？ &lt;code>Hello World!&lt;/code> と出力され、正常に処理が終了したためコンテナも終了し、ターミナルに戻ったはずです。Dockerfileを書いて、コンテナイメージをビルドし、コンテナを立ち上げるという一連の流れを体験することができましたね！&lt;/p>
-&lt;h3 id="閑話休題--自分用にタグを設定する">閑話休題 : 自分用にタグを設定する&lt;/h3>
+&lt;h3 id="自分用にタグを設定する">自分用にタグを設定する&lt;/h3>
 &lt;p>ところで、先ほどの手順でIMAGE IDを利用するのが面倒ではありませんでしたか？&lt;br>
 実は、&lt;code>--tag&lt;/code>(省略形は&lt;code>-t&lt;/code>)オプションを使うことで自分用にタグをつけることができ、そのタグを使ってコンテナイメージを指定することができます。
 たとえばこんな感じです。&lt;/p>
@@ -120,7 +127,7 @@ DockerにはDockerの作法があり、作法を逸脱するとわりとつら�
 &lt;/ol>
 &lt;p>という処理がビルド時に実行されることがわかります。&lt;/p>
 &lt;p>注意点として、あたりまえですが&lt;code>COPY&lt;/code>したファイルはコンテナイメージに含まれます。コンテナイメージをダウンロードした人は誰でもコンテナの中に置かれたファイルを見ることができるようになるということです。業務でも個人プロジェクトでもそうですが、機密情報はコンテナイメージの外(S3やDBなど)に持つようにする、&lt;code>ENV&lt;/code>コマンドを使うことで環境変数として起動時に初めて渡すようにし、イメージ内部には持たないようにするなどしましょう。そもそも機密を含むものが誰でも利用できるようになること自体避けたいわけですが(プロダクション用のイメージなどはプライベートレジストリを使うべきです)。&lt;/p>
-&lt;h3 id="閑話休題--argを使ってみよう">閑話休題 : ARGを使ってみよう&lt;/h3>
+&lt;h3 id="argを使ってみよう">ARGを使ってみよう&lt;/h3>
 &lt;p>ここまで書いたDockerfileはすべてタグを固定で書いています。別のイメージを試したくなったときはDockerfileに手を加える必要があるわけですが、試すだけなのにエディタを開くのはちょっとおっくうです。&lt;br>
 そこで、ビルドコマンドの引数でタグを渡してあげればいい感じに&lt;code>FROM&lt;/code>で持ってくるイメージを変えることができるようにしてみましょう。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-Dockerfile" data-lang="Dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">ARG&lt;/span> TAG&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;3.10.4-bullseye&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
