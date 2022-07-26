@@ -157,41 +157,41 @@ DockerにはDockerの作法があり、作法を逸脱するとわりとつら�
 この次のステップは、自分のサービスを動かしてみることになると思います。そのステップをやりきるには、この記事にある情報だけでは難しいと思います。公式ドキュメントに軽く目を通しながら進めていくことを強くおすすめします。&lt;br>
 また、記事では触れませんでしたが、リポジトリには&lt;code>ステージ&lt;/code>とそれを活用した&lt;code>マルチステージビルド&lt;/code>の例も置いています&lt;sup id="fnref:9">&lt;a href="#fn:9" class="footnote-ref" role="doc-noteref">9&lt;/a>&lt;/sup>。気になる方はどうぞ。&lt;/p>
 &lt;p>コメントや誤りの連絡は、&lt;a href="https://github.com/kei-s16/kei-s16.github.io/issues/new">issue&lt;/a>にお願いします。&lt;/p>
-&lt;section class="footnotes" role="doc-endnotes">
+&lt;div class="footnotes" role="doc-endnotes">
 &lt;hr>
 &lt;ol>
-&lt;li id="fn:1" role="doc-endnote">
+&lt;li id="fn:1">
 &lt;p>厳密には、&lt;code>カーネルレベルの依存関係をすべてホストマシンに委ねることで、Dockerを利用している開発者の視点では任意の必要なソフトウェアだけでのアプリケーションの実行が可能になっているように見える&lt;/code>。Dockerの実行環境自身がときどきこのあたり意識することを要求してくる。ECSやCloud Runなどのマネージドなコンテナ実行環境を利用するなら、この部分はクラウド事業者が管理してくれるのである程度無視できる。&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:2" role="doc-endnote">
+&lt;li id="fn:2">
 &lt;p>このセクションには理想が多分に含まれている。&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:3" role="doc-endnote">
+&lt;li id="fn:3">
 &lt;p>厳密にはコンテナ仮想化技術。&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:4" role="doc-endnote">
+&lt;li id="fn:4">
 &lt;p>誰向けなのかわからない注釈 : Vagrantfileのようなものを想像するとわかりやすい。&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:5" role="doc-endnote">
+&lt;li id="fn:5">
 &lt;p>なんでこんなことを書いているのかって？ ひどい目にあったからですよ(なんもわかってないときに書いたDockerfileを直しながら)。&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:6" role="doc-endnote">
+&lt;li id="fn:6">
 &lt;p>タグだけ与えた場合はデフォルトではDockerhubから取得してくる。URIを与えることで、任意のコンテナレジストリ&lt;sup id="fnref:10">&lt;a href="#fn:10" class="footnote-ref" role="doc-noteref">10&lt;/a>&lt;/sup>から取得することができる。&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:7" role="doc-endnote">
+&lt;li id="fn:7">
 &lt;p>ここでワンライナーを持ち出すのはやめてください。&amp;#160;&lt;a href="#fnref:7" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:8" role="doc-endnote">
+&lt;li id="fn:8">
 &lt;p>とはいえ、&lt;code>RUN&lt;/code>にはビルドの仕組みを知らないとひっかかりやすい落とし穴があったりする。ガリガリ書き始めるまえに、公式ドキュメントを読むことをおすすめします。&amp;#160;&lt;a href="#fnref:8" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:9" role="doc-endnote">
+&lt;li id="fn:9">
 &lt;p>途中で力尽きたとも言う。想定読者的にはまだいらんじゃろという気持ちもある&amp;#160;&lt;a href="#fnref:9" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
-&lt;li id="fn:10" role="doc-endnote">
+&lt;li id="fn:10">
 &lt;p>Elastic Container Registry, Github Contgainer Registry, 自宅に立てたオレオレレジストリなど。&amp;#160;&lt;a href="#fnref:10" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></content></item><item><title>Github PagesにHugoをデプロイする</title><link>/posts/hugo-on-github-pages/</link><pubDate>Mon, 21 Feb 2022 01:00:00 +0900</pubDate><guid>/posts/hugo-on-github-pages/</guid><description>目次 前置き 背景 選定 やっていき 設計 実装 Hugo GitHubActions GitHub Pagesの設定 完走した感想 前置き 背景 gistなどで管理していたもろもろのメモをもうちょっときれいに見せたくなったので、ブログ形式で残すことにしました。 が、今日日どっかのブログサービスもなーでも自前でWordPressなんかもちょっとキツいなーという感じです。 これだけで伝わらないと思うので、気持ち的な要件をリストアップすると、こんな感じ。 テキストがブラウザ</description><content>&lt;h2 id="目次">目次&lt;/h2>
+&lt;/div></content></item><item><title>Github PagesにHugoをデプロイする</title><link>/posts/hugo-on-github-pages/</link><pubDate>Mon, 21 Feb 2022 01:00:00 +0900</pubDate><guid>/posts/hugo-on-github-pages/</guid><description>目次 前置き 背景 選定 やっていき 設計 実装 Hugo GitHubActions GitHub Pagesの設定 完走した感想 前置き 背景 gistなどで管理していたもろもろのメモをもうちょっときれいに見せたくなったので、ブログ形式で残すことにしました。 が、今日日どっかのブログサービスもなーでも自前でWordPressなんかもちょっとキツいなーという感じです。 これだけで伝わらないと思うので、気持ち的な要件をリストアップすると、こんな感じ。 テキストがブラウザ</description><content>&lt;h2 id="目次">目次&lt;/h2>
 &lt;ol>
 &lt;li>&lt;a href="#%E5%89%8D%E7%BD%AE%E3%81%8D">前置き&lt;/a>
 &lt;ol>
