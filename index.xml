@@ -1,4 +1,117 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Tue, 26 Jul 2022 22:00:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>ISUCON初参加のふりかえり</title><link>/posts/isu12q-report/</link><pubDate>Tue, 26 Jul 2022 22:00:00 +0900</pubDate><guid>/posts/isu12q-report/</guid><description>ISUCONというパフォーマンスチューニングの大会、あるいはイベントがあります。 過去に社内イベントで競技者として1回、運営として1回参加し、なかなかおもしろかったのでいつか本家にも出てみたいなと思っていたところ、会社の後輩が参加登録に成功し、チームに誘ってもらえたのでISUCON12の予選に初めて参加しました。 そして当然のごとく予選落ちしました。 朝食の肖像 pic.twitter.com/2Ks8PbZJei &amp;mdash; kei (@_kei_s) July 23, 2022 (起床に成功したので調子に乗</description><content>&lt;p>ISUCONというパフォーマンスチューニングの大会、あるいはイベントがあります。&lt;br>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Thu, 11 Aug 2022 16:00:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>GCP Compute Engineの永久無料枠でarchlinuxを起動する</title><link>/posts/setup-archlinux-on-compute-engine-free-tier/</link><pubDate>Thu, 11 Aug 2022 16:00:00 +0900</pubDate><guid>/posts/setup-archlinux-on-compute-engine-free-tier/</guid><description>前置き tailscale + 自宅サーバ群でそれなりに快適なサーバ生活を送っていた私ですが、「やはりクラウドにも1台くらい持っておくべきだよな、社会人として」、という思いつきにより、適当にサーバを立てることにしました。 条件は以下です。単純ですね。 archlinuxが動くこと なるべく安いこと スペックはneovimが快適に動けばヨシ AWSでないこと(AWSが嫌いというわけではなく、普段使っていないものにしたい) リージョン</description><content>&lt;h2 id="前置き">前置き&lt;/h2>
+&lt;p>tailscale + 自宅サーバ群でそれなりに快適なサーバ生活を送っていた私ですが、「やはりクラウドにも1台くらい持っておくべきだよな、社会人として」、という思いつきにより、適当にサーバを立てることにしました。&lt;/p>
+&lt;p>条件は以下です。単純ですね。&lt;/p>
+&lt;ul>
+&lt;li>archlinuxが動くこと&lt;/li>
+&lt;li>なるべく安いこと&lt;/li>
+&lt;li>スペックはneovimが快適に動けばヨシ&lt;/li>
+&lt;li>AWSでないこと(AWSが嫌いというわけではなく、普段使っていないものにしたい)&lt;/li>
+&lt;li>リージョンはUS, JP, TWくらいならどこでもいい(EUは遠すぎる)&lt;/li>
+&lt;/ul>
+&lt;p>ハードルとしてはほとんど地面すれすれぐらいの低さです。&lt;br>
+この条件で海外VPSサービスなども考慮に入れると選択肢は無限大なのですが、ここは&lt;del>たまたまTwitterでみかけた記事をそのまま参考にします&lt;/del>メディアの力を頼ることにします。&lt;br>
+&lt;a href="https://www.publickey1.jp/blog/22/free_tier2022.html">期限の制約なく無料で使えるクラウド「Free Tier」主要サービスまとめ。2022年版&lt;/a>&lt;/p>
+&lt;p>lifetime-freeで仮想マシンを与えてくれるサービスが2つもいたので、&lt;strong>なるべく安い&lt;/strong> を飛び越して無料にすることができそうです。&lt;br>
+軽く調べたところ、GCPのCompute Engineには、archlinuxのイメージを使えるらしいので、記事タイトルでお察しではありますが、即決でこちらにしました。&lt;br>
+(ちなみに、スペックはOCIもGCPも無料にしてはいい感じでした。OCIはいろいろもうちょっと頑張って覇権取りに行く姿勢を見せてほしい……)&lt;/p>
+&lt;h2 id="やっていき">やっていき&lt;/h2>
+&lt;h3 id="前準備">前準備&lt;/h3>
+&lt;h4 id="gcpのアカウントを作る">GCPのアカウントを作る&lt;/h4>
+&lt;p>&lt;a href="https://cloud.google.com/gcp/?hl=ja">こちら&lt;/a>からどうぞ。
+初回だと4万円ぶんくらいのクレジットも貰えるので、設定ミスって請求がばくはつしてもある程度はあんしんです。&lt;br>
+アカウントの作成と同時に、ワークスペースが作成されます。概念的にはAWSのアカウントに相当するっぽい。この中に、VPCやCE, GKEなどのリソースが作成されていくようです。&lt;/p>
+&lt;h4 id="ローカルにsdkを導入する">ローカルにSDKを導入する&lt;/h4>
+&lt;p>作業環境はarchlinuxです。
+それ以外の環境を使っている人がもしいれば、&lt;a href="https://cloud.google.com/sdk/">公式のドキュメント&lt;/a>を参考に導入してください。&lt;/p>
+&lt;p>archlinuxの場合、AURから&lt;a href="https://aur.archlinux.org/packages/google-cloud-sdk">google-cloud-sdk&lt;/a>をインストールすることができます。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% yay -S google-cloud-sdk
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>このあと &lt;code>gcloud&lt;/code> コマンドを叩いてみると、ほかに依存パッケージがいたようで、エラーを吐かれたのでそれもインストールします。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% sudo pacman -S libxcrypt-compat
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="gcloudコマンドにgcpの認証を通す">gcloudコマンドにGCPの認証を通す&lt;/h4>
+&lt;p>&lt;code>aws configure&lt;/code> みたいなやつです。&lt;br>
+ブラウザを勝手に立ち上げて、いつものGoogle認証を許可すればOKで、事前にIAMユーザ作っておいてACCESS_KEY, SECRET_KEYをコピペして……みたいなことは不要でした。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% gcloud init
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># いろいろ出るが省略&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># GCPの認証を通す&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You must log in to &lt;span style="color:#66d9ef">continue&lt;/span>. Would you like to log in &lt;span style="color:#f92672">(&lt;/span>Y/n&lt;span style="color:#f92672">)&lt;/span>? &lt;span style="color:#75715e"># Enterを叩くとブラウザが開くので、Googleアカウントの認証を通す&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You are logged in as: &lt;span style="color:#f92672">[&lt;/span>your.mail.address@example.com&lt;span style="color:#f92672">]&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># プロジェクトを選ぶ&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Pick cloud project to use:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">[&lt;/span>1&lt;span style="color:#f92672">]&lt;/span> hoge-project &lt;span style="color:#75715e"># デフォルトで作られているプロジェクト名&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">[&lt;/span>2&lt;span style="color:#f92672">]&lt;/span> Enter a project ID
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">[&lt;/span>3&lt;span style="color:#f92672">]&lt;/span> Create a new project
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please enter numeric choice or text value &lt;span style="color:#f92672">(&lt;/span>must exactly match list item&lt;span style="color:#f92672">)&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Your current project has been set to: &lt;span style="color:#f92672">[&lt;/span>hoge-project&lt;span style="color:#f92672">]&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># デフォルトリージョンを選択する&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Do you want to configure a default Compute Region and Zone? &lt;span style="color:#f92672">(&lt;/span>Y/n&lt;span style="color:#f92672">)&lt;/span>?
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Which Google Compute Engine zone would you like to use as project default?
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>If you &lt;span style="color:#66d9ef">do&lt;/span> not specify a zone via a command line flag &lt;span style="color:#66d9ef">while&lt;/span> working with Compute Engine resources, the default is assumed.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># リストが出るが長いので省略&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Too many options &lt;span style="color:#f92672">[&lt;/span>104&lt;span style="color:#f92672">]&lt;/span>. Enter &lt;span style="color:#e6db74">&amp;#34;list&amp;#34;&lt;/span> at prompt to print choices fully.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please enter numeric choice or text value &lt;span style="color:#f92672">(&lt;/span>must exactly match list item&lt;span style="color:#f92672">)&lt;/span>: &lt;span style="color:#ae81ff">11&lt;/span> &lt;span style="color:#75715e"># 無料枠を使いたいのでオレゴンを選択&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Your project default Compute Engine zone has been set to &lt;span style="color:#f92672">[&lt;/span>us-west1-b&lt;span style="color:#f92672">]&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You can change it by running &lt;span style="color:#f92672">[&lt;/span>gcloud config set compute/zone NAME&lt;span style="color:#f92672">]&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Your project default Compute Engine region has been set to &lt;span style="color:#f92672">[&lt;/span>us-west1&lt;span style="color:#f92672">]&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You can change it by running &lt;span style="color:#f92672">[&lt;/span>gcloud config set compute/region NAME&lt;span style="color:#f92672">]&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># このあともいろいろ出るが、ここに設定あるからね系のアナウンスなので省略&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="archlinuxのインスタンスを起動する">archlinuxのインスタンスを起動する&lt;/h3>
+&lt;p>イメージはGCP側で用意されているようです。&lt;br>
+&lt;a href="https://github.com/GoogleCloudPlatform/compute-archlinux-image-builder">GoogleCloudPlatform/compute-archlinux-image-builder&lt;/a>のREADMEに従って、インスタンスを作成・起動します。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>gcloud compute instances create arch-1 &lt;span style="color:#ae81ff">\ &lt;/span>&lt;span style="color:#75715e"># インスタンス・ストレージ名になる&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --image-project&lt;span style="color:#f92672">=&lt;/span>arch-linux-gce &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> --image-family&lt;span style="color:#f92672">=&lt;/span>arch &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> --machine-type&lt;span style="color:#f92672">=&lt;/span>e2-micro &lt;span style="color:#ae81ff">\ &lt;/span>&lt;span style="color:#75715e"># 永久無料枠のサイズにする&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --boot-disk-size&lt;span style="color:#f92672">=&lt;/span>30GB &lt;span style="color:#75715e"># 30GBまでストレージ無料なので、せっかくだしデフォルトより大きくしておく&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># warnが出るけど、気にしない&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME ZONE MACHINE_TYPE PREEMPTIBLE INTERNAL_IP EXTERNAL_IP STATUS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>arch-1 us-west1-b e2-micro &lt;span style="color:#f92672">{&lt;/span>INTERNAL_IP&lt;span style="color:#f92672">}&lt;/span> &lt;span style="color:#f92672">{&lt;/span>EXTERNAL_IP&lt;span style="color:#f92672">}&lt;/span> RUNNING
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>これでインスタンスが作成・起動されます。
+&lt;img src="/images/setup-archlinux-on-compute-engine-free-tier/compute-engine.png" alt="Webコンソールのスクリーンショット">&lt;/p>
+&lt;p>ブラウザからSSHボタンを押すと、別窓でインスタンスに対するSSHが起動します。&lt;br>
+また、&lt;code>gcloud compute ssh ${インスタンス名}&lt;/code> で、&lt;code>vagrant ssh&lt;/code> のような感覚で、ターミナルから接続することもできます。&lt;br>
+接続時にはブラウザ経由の場合はGCPに登録してあるメールアドレスのユーザ名部分、&lt;code>gcloud&lt;/code> 経由の場合には接続元のマシンのユーザ名で新規ユーザが作成されます。&lt;/p>
+&lt;h3 id="起動後">起動後&lt;/h3>
+&lt;p>とりあえずパッケージの更新をしておきましょう。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% sudo pacman -S archlinux-keyring
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sudo pacman -Syyu
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>これでおわりです。&lt;br>
+あとはお好きにどうぞ。&lt;/p>
+&lt;h3 id="そのほかやっておくこと">そのほかやっておくこと&lt;/h3>
+&lt;h4 id="pingに応答しないようにしておく">pingに応答しないようにしておく&lt;/h4>
+&lt;p>なぜかインターネットからのpingに応答するのがデフォルトになっているので、 &lt;code>default-allow-icmp&lt;/code> を削除する。&lt;br>
+設定は別画面にあるので、スクショのようにして探す。&lt;br>
+&lt;img src="/images/setup-archlinux-on-compute-engine-free-tier/firewall.png" alt="ファイアウォール設定画面までののスクリーンショット">&lt;/p>
+&lt;h4 id="sshのポート番号を変えておく">sshのポート番号を変えておく&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% sudo pacman -S vim
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% export EDITOR&lt;span style="color:#f92672">=&lt;/span>vim
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sudoedit /etc/ssh/sshd_config
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># `# Port 22` の行を探し、`Port {任意の番号}` に変えておく&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sudo systemctl restart sshd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上記が終わったら、GCPのファイアウォール設定から、 &lt;code>default-allow-ssh&lt;/code> のルールを探し、ポート番号を変更する。&lt;/p>
+&lt;h4 id="普通にsshできるようにする">普通にsshできるようにする&lt;/h4>
+&lt;p>&lt;code>gcloud compute ssh&lt;/code> でもいいんだけど、ポート番号変えたりするとつらいところがあるので、普通にsshできるように設定をエクスポートする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% gcloud compute config-ssh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>これを実行すると、&lt;code>~/.ssh/config&lt;/code> に設定が追記されるので、適宜ユーザ名やポート番号を追記・編集する。&lt;/p>
+&lt;h4 id="予算アラートを設定する">予算アラートを設定する&lt;/h4>
+&lt;p>Webコンソールからの導線がわかりにくいので、画面上部の検索メニューに &lt;code>予算とアラート&lt;/code> と入力して設定ページに飛ぶ。&lt;br>
+とりあえず1円で設定しておけばよさげ。クーポンや無料枠ぶんを反映する設定にしておかないと、割引前の請求額でアラートを飛ばすようなので、そこだけ注意。&lt;/p>
+&lt;h2 id="感想">感想&lt;/h2>
+&lt;p>わりとさっくりいけたので特に書くことがない……。&lt;br>
+とりあえず立てたインスタンスにはこれからSELinuxをいれたりなんだりして、便利に使っていこうと思います。&lt;/p>
+&lt;p>あと今回ほとんど初めてGCPを触ったけど、AWSとはやっぱり文化が違う感じがしていて、AWS, Azure, OCIに連なるサービスというより、どちらかというと強いherokuみたいな印象を受けた。&lt;br>
+コンソールが使いにくい・デフォルト設定がわりと不思議、みたいなところはあるけど、極端なつらみはない(Windows版firefoxで表示が崩れまくるので、別のところでつらみはあったけど)ので、個人利用程度だったら人に勧めるかも。&lt;/p>
+&lt;p>そんな感じです。&lt;/p></content></item><item><title>ISUCON初参加のふりかえり</title><link>/posts/isu12q-report/</link><pubDate>Tue, 26 Jul 2022 22:00:00 +0900</pubDate><guid>/posts/isu12q-report/</guid><description>ISUCONというパフォーマンスチューニングの大会、あるいはイベントがあります。 過去に社内イベントで競技者として1回、運営として1回参加し、なかなかおもしろかったのでいつか本家にも出てみたいなと思っていたところ、会社の後輩が参加登録に成功し、チームに誘ってもらえたのでISUCON12の予選に初めて参加しました。 そして当然のごとく予選落ちしました。 朝食の肖像 pic.twitter.com/2Ks8PbZJei &amp;mdash; kei (@_kei_s) July 23, 2022 (起床に成功したので調子に乗</description><content>&lt;p>ISUCONというパフォーマンスチューニングの大会、あるいはイベントがあります。&lt;br>
 過去に社内イベントで競技者として1回、運営として1回参加し、なかなかおもしろかったのでいつか本家にも出てみたいなと思っていたところ、会社の後輩が参加登録に成功し、チームに誘ってもらえたので&lt;a href="https://isucon.net/archives/56571716.html">ISUCON12&lt;/a>の予選に初めて参加しました。&lt;br>
 そして当然のごとく予選落ちしました。&lt;/p>
 &lt;p>&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">朝食の肖像 &lt;a href="https://t.co/2Ks8PbZJei">pic.twitter.com/2Ks8PbZJei&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1550632062256033792?ref_src=twsrc%5Etfw">July 23, 2022&lt;/a>&lt;/blockquote>
