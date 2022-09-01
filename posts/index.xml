@@ -1,4 +1,85 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on blog</title><link>/posts/</link><description>Recent content in Posts on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Thu, 11 Aug 2022 16:00:00 +0900</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>GCP Compute Engineの永久無料枠でarchlinuxを起動する</title><link>/posts/setup-archlinux-on-compute-engine-free-tier/</link><pubDate>Thu, 11 Aug 2022 16:00:00 +0900</pubDate><guid>/posts/setup-archlinux-on-compute-engine-free-tier/</guid><description>前置き tailscale + 自宅サーバ群でそれなりに快適なサーバ生活を送っていた私ですが、「やはりクラウドにも1台くらい持っておくべきだよな、社会人として」、という思いつきにより、適当にサーバを立てることにしました。 条件は以下です。単純ですね。 archlinuxが動くこと なるべく安いこと スペックはneovimが快適に動けばヨシ AWSでないこと(AWSが嫌いというわけではなく、普段使っていないものにしたい) リージョン</description><content>&lt;h2 id="前置き">前置き&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on blog</title><link>/posts/</link><description>Recent content in Posts on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Fri, 02 Sep 2022 00:00:00 +0900</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Cloudformationの小技</title><link>/posts/cloudformation-tips/</link><pubDate>Fri, 02 Sep 2022 00:00:00 +0900</pubDate><guid>/posts/cloudformation-tips/</guid><description>最近Cloudformationを書く機会が増えてterraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあっていて、それに伴い小技みたいなものを人に話す機会も増えたので</description><content>&lt;p>最近Cloudformationを書く機会が増えて&lt;del>terraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあって&lt;/del>いて、それに伴い小技みたいなものを人に話す機会も増えたので、メモしておく。&lt;br>
+Cloudformationをちゃんと触り始めて2週間くらいなので、もっといい方法あるよとか間違ってるよとかあったら教えてください。Twitterとかで。&lt;/p>
+&lt;h2 id="parameterを選択式にしたい">Parameterを選択式にしたい&lt;/h2>
+&lt;p>AllowedValuesを指定してあげることで、マネジメントコンソールのParameter欄を入力式から選択式にできる&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Stage&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Type&lt;/span>: &lt;span style="color:#ae81ff">String&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">AllowedValues&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">production&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">develop&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="parameterの入力を見て使う値をいい感じに変更したい">Parameterの入力を見て、使う値をいい感じに変更したい&lt;/h2>
+&lt;p>たとえば、既存のネットワークリソースの中に作成するコンピューティングリソースを定義するCloudformationを書くとする。同じCloudformationで複数のステージにデプロイできるようにもしたい。&lt;br>
+このとき、コンピューティングリソースを作成するVPC IDや関連づけるサブネットのIDを素直にParameterで入力させるもありだが、対象が少ないうちはまだしもテンプレートが膨れ上がって入力すべき値が増えてくると入力が大変。そこで、MappingsとFindInMapを使って、Parameterの値を元に事前に決めた値を参照するように書いてあげる。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Stage&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Type&lt;/span>: &lt;span style="color:#ae81ff">String&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">AllowedValues&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">production&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">develop&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Mappings&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">StageMap&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">production&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">vpcId&lt;/span>: &lt;span style="color:#ae81ff">vpc-hogehoge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">publicSubnets&lt;/span>: [&lt;span style="color:#e6db74">&amp;#34;subnet-hoge&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;subnet-fuga&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">develop&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">vpcId&lt;/span>: &lt;span style="color:#ae81ff">vpc-piyopiyo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">publicSubnets&lt;/span>: [&lt;span style="color:#e6db74">&amp;#34;subnet-foo&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;subnet-bar&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Resources&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">ExampleResource&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Type&lt;/span>: &lt;span style="color:#ae81ff">AWS::Example::ResourceType&lt;/span> &lt;span style="color:#75715e"># 実際にこんなリソースはないのでコピッペではうごかない&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Properties&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Vpc&lt;/span>: !&lt;span style="color:#ae81ff">FindInMap [StageMap, !Ref Stage, vpcId]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Subnets&lt;/span>: !&lt;span style="color:#ae81ff">FindInMap [StageMap, !Ref Stage, publicSubnets]&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="parameterの入力を見てリソースを作成するかどうかいい感じに決めてほしい">Parameterの入力を見て、リソースを作成するかどうかいい感じに決めてほしい&lt;/h2>
+&lt;p>前述のケースでは環境ごとにリソースの設定値を切り替えられたが、そもそもリソースがいらない場合もある。&lt;br>
+たとえば、本番はサーバ2台いるけど開発はべつに1台でもいいよねとか。&lt;br>
+そんなときはConditionsを使う。&lt;a href="https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html">Resourcesの中にConditionを指定してあげると、Trueな場合のみリソースが作成される&lt;/a>ので、この仕組みをうまいこと使ってあげる。&lt;/p>
+&lt;h3 id="parameterで都度受けつけるパターン">Parameterで都度受けつけるパターン&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Stage&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Type&lt;/span>: &lt;span style="color:#ae81ff">String&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">AllowedValues&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">production&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">develop&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">RequireStandbyInstance&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Type&lt;/span>: &lt;span style="color:#ae81ff">String&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">AllowedValues&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#66d9ef">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">isRequireStandbyInstance&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> !&lt;span style="color:#ae81ff">Equals [true, !Ref RequireStandbyInstance]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Resources&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">StandbyInstance&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Condition&lt;/span>: &lt;span style="color:#ae81ff">isRequireStandbyInstance&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="stageごとに決め打ちするパターン">Stageごとに決め打ちするパターン&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Stage&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Type&lt;/span>: &lt;span style="color:#ae81ff">String&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">AllowedValues&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">production&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">develop&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Mappings&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">StageMap&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">production&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">requireStandbyInstance&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">develop&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">requireStandbyInstance&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;false&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">isRequireStandbyInstance&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> !&lt;span style="color:#ae81ff">Equals [true, !FindInMap [StageMap, !Ref Stage, requireStandbyInstance]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">Resources&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">StandbyInstance&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">Condition&lt;/span>: &lt;span style="color:#ae81ff">isRequireStandbyInstance&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></content></item><item><title>GCP Compute Engineの永久無料枠でarchlinuxを起動する</title><link>/posts/setup-archlinux-on-compute-engine-free-tier/</link><pubDate>Thu, 11 Aug 2022 16:00:00 +0900</pubDate><guid>/posts/setup-archlinux-on-compute-engine-free-tier/</guid><description>前置き tailscale + 自宅サーバ群でそれなりに快適なサーバ生活を送っていた私ですが、「やはりクラウドにも1台くらい持っておくべきだよな、社会人として」、という思いつきにより、適当にサーバを立てることにしました。 条件は以下です。単純ですね。 archlinuxが動くこと なるべく安いこと スペックはneovimが快適に動けばヨシ AWSでないこと(AWSが嫌いというわけではなく、普段使っていないものにしたい) リージョン</description><content>&lt;h2 id="前置き">前置き&lt;/h2>
 &lt;p>tailscale + 自宅サーバ群でそれなりに快適なサーバ生活を送っていた私ですが、「やはりクラウドにも1台くらい持っておくべきだよな、社会人として」、という思いつきにより、適当にサーバを立てることにしました。&lt;/p>
 &lt;p>条件は以下です。単純ですね。&lt;/p>
 &lt;ul>
