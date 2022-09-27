@@ -1,4 +1,61 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on blog</title><link>/posts/</link><description>Recent content in Posts on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Fri, 02 Sep 2022 00:00:00 +0900</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Cloudformationの小技</title><link>/posts/cloudformation-tips/</link><pubDate>Fri, 02 Sep 2022 00:00:00 +0900</pubDate><guid>/posts/cloudformation-tips/</guid><description>最近Cloudformationを書く機会が増えてterraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあっていて、それに伴い小技みたいなものを人に話す機会も増えたので</description><content>&lt;p>最近Cloudformationを書く機会が増えて&lt;del>terraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあって&lt;/del>いて、それに伴い小技みたいなものを人に話す機会も増えたので、メモしておく。&lt;br>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on blog</title><link>/posts/</link><description>Recent content in Posts on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Tue, 27 Sep 2022 21:00:21 +0900</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>自宅のk8sクラスタを更新した記録</title><link>/posts/upgrade-home-k8s-cluster/</link><pubDate>Tue, 27 Sep 2022 21:00:21 +0900</pubDate><guid>/posts/upgrade-home-k8s-cluster/</guid><description>自宅のk8sクラスターを1.24.0から1.25.2に更新しました。 毎回CNIやコンテナエンジンの変更に追従できず更新に失敗して泣きながらクラスタを再構築していたのですが、今回はなにごともなく完了できたので、記念にメモを残しておきます。 逆に言うと、何事もなさすぎてみどころはないです。これから更新にチャレンジする人は公式ドキュメントを読みながらやってください。 クラスタ node一覧は下記の通り。OSは</description><content>&lt;p>自宅のk8sクラスターを1.24.0から1.25.2に更新しました。&lt;br>
+毎回CNIやコンテナエンジンの変更に追従できず更新に失敗して泣きながらクラスタを再構築していたのですが、今回はなにごともなく完了できたので、記念にメモを残しておきます。&lt;br>
+逆に言うと、何事もなさすぎてみどころはないです。これから更新にチャレンジする人は&lt;a href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/">公式ドキュメント&lt;/a>を読みながらやってください。&lt;/p>
+&lt;h2 id="クラスタ">クラスタ&lt;/h2>
+&lt;p>node一覧は下記の通り。OSはすべてarchlinux(ARM), ホストマシンはRaspberry Pi 4(4GB)。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>ホスト名&lt;/th>
+&lt;th>ロール&lt;/th>
+&lt;th>備考&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>kisaragi&lt;/td>
+&lt;td>control-plane&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>akizuki&lt;/td>
+&lt;td>worker&lt;/td>
+&lt;td>踏み台サーバ, 家庭内Ansible実行環境としても利用&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>mogami&lt;/td>
+&lt;td>worker&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>kumano&lt;/td>
+&lt;td>worker&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="control-plane">control-plane&lt;/h2>
+&lt;p>&lt;code>kubeadm&lt;/code>, &lt;code>kubelet&lt;/code>を更新する。今回は &lt;code>yay&lt;/code> でパッケージを管理しているので、一括更新でやってしまう。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% yay -Syyu
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>kubeadmのバージョンが狙ったもの(今回は &lt;code>1.25.2&lt;/code>)になっていることを確認する。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% kubeadm version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubeadm version: &amp;amp;version.Info&lt;span style="color:#f92672">{&lt;/span>Major:&lt;span style="color:#e6db74">&amp;#34;1&amp;#34;&lt;/span>, Minor:&lt;span style="color:#e6db74">&amp;#34;25&amp;#34;&lt;/span>, GitVersion:&lt;span style="color:#e6db74">&amp;#34;v1.25.2&amp;#34;&lt;/span>, GitCommit:&lt;span style="color:#e6db74">&amp;#34;5835544ca568b757a8ecae5c153f317e5736700e&amp;#34;&lt;/span>, GitTreeState:&lt;span style="color:#e6db74">&amp;#34;clean&amp;#34;&lt;/span>, BuildDate:&lt;span style="color:#e6db74">&amp;#34;2022-09-21T14:32:18Z&amp;#34;&lt;/span>, GoVersion:&lt;span style="color:#e6db74">&amp;#34;go1.19.1&amp;#34;&lt;/span>, Compiler:&lt;span style="color:#e6db74">&amp;#34;gc&amp;#34;&lt;/span>, Platform:&lt;span style="color:#e6db74">&amp;#34;linux/arm64&amp;#34;&lt;/span>&lt;span style="color:#f92672">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>dry-run的なコマンドでアップグレード内容が問題ないことを確認する。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% sudo kubeadm upgrade plan
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>問題なければバージョンを指定し、実際に反映する。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% sudo kubeadm upgrade apply v1.25.2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>めちゃくちゃ時間かかるのでじっと待つ。実行ログが都度出るので何が起きているかは確認できるが、それでも不安なら &lt;code>top&lt;/code> で様子を見ておく。正常に動いていれば、&lt;code>kube-apiserver&lt;/code>, &lt;code>kubelet&lt;/code>, &lt;code>kube-controller&lt;/code>, &lt;code>containerd&lt;/code> あたりが上に浮いたり沈んだりする。&lt;/p>
+&lt;h2 id="workers">workers&lt;/h2>
+&lt;p>control-planeで、kubeletをアップデートしたいノードにサービスやコンテナが割り当てられないようにする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% kubectl drain &lt;span style="color:#e6db74">${&lt;/span>TARGET_NODE_NAME&lt;span style="color:#e6db74">}&lt;/span> --ignore-daemonsets
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>アップデートしたいノードにログインし、kubeletを更新・再起動する。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% sudo systemctl daemon-restart
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% sudo systemctl restart kubelet
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>再度ノードにサービスやコンテナが割り当てられるようにする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>% kubectl uncordon &lt;span style="color:#e6db74">${&lt;/span>TARGET_NODE_NAME&lt;span style="color:#e6db74">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>この手順をクラスタに属するノードぶん繰り返す。&lt;/p>
+&lt;h2 id="完走した感想">完走した感想&lt;/h2>
+&lt;p>なにごともなく無事に終わると書くことがない。&lt;/p></content></item><item><title>Cloudformationの小技</title><link>/posts/cloudformation-tips/</link><pubDate>Fri, 02 Sep 2022 00:00:00 +0900</pubDate><guid>/posts/cloudformation-tips/</guid><description>最近Cloudformationを書く機会が増えてterraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあっていて、それに伴い小技みたいなものを人に話す機会も増えたので</description><content>&lt;p>最近Cloudformationを書く機会が増えて&lt;del>terraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあって&lt;/del>いて、それに伴い小技みたいなものを人に話す機会も増えたので、メモしておく。&lt;br>
 Cloudformationをちゃんと触り始めて2週間くらいなので、もっといい方法あるよとか間違ってるよとかあったら教えてください。Twitterとかで。&lt;/p>
 &lt;h2 id="parameterを選択式にしたい">Parameterを選択式にしたい&lt;/h2>
 &lt;p>AllowedValuesを指定してあげることで、マネジメントコンソールのParameter欄を入力式から選択式にできる&lt;/p>
