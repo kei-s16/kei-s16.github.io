@@ -1,4 +1,149 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Mon, 21 Nov 2022 00:00:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Dagger.ioを使ってみた</title><link>/posts/build-ci-cd-pipeline-with-dagger/</link><pubDate>Mon, 21 Nov 2022 00:00:00 +0900</pubDate><guid>/posts/build-ci-cd-pipeline-with-dagger/</guid><description>前置き Dagger.ioというCI/CDパイプラインエンジンがある。 世の中にはGitHub ActionsやAWS CodeBuild, Circle CIなど、さまざまなCI/CDサービスがある。これらはそれぞれ記法が違ったり実行環境に制限があったりと、サービス提供者ごとに良くも悪くも差別化がされている。 どのサービスも使いやすく、便利だったりするが、トレードオフとしてローカルでワークフローのテストができなかったり、他のサービスへの</description><content>&lt;h2 id="前置き">前置き&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 10 Dec 2022 19:00:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>2022年買ってよかったもの</title><link>/posts/2022-best-buy/</link><pubDate>Sat, 10 Dec 2022 19:00:00 +0900</pubDate><guid>/posts/2022-best-buy/</guid><description>早いもので2022年も終わろうとしています。 今年は(たぶん)もう大きな買い物をすることもないと思うので、散財した購入したもののうち、よかったものを紹介しようと思います。 リンクは基本的に公式の商品紹介ページに飛びます。なかった場合はAmazonのリンク(非アフィリエイト)になります。 10位 Amazon Kindle Paperwhite(8GB、広告なし) Amazon 今年、突如「こんなん持ってたら動画ばっか見てあほになる！」とiPa</description><content>&lt;p>早いもので2022年も終わろうとしています。&lt;br>
+今年は(たぶん)もう大きな買い物をすることもないと思うので、&lt;del>散財した&lt;/del>購入したもののうち、よかったものを紹介しようと思います。&lt;br>
+リンクは基本的に公式の商品紹介ページに飛びます。なかった場合はAmazonのリンク(非アフィリエイト)になります。&lt;/p>
+&lt;h2 id="10位-amazon-kindle-paperwhite8gb広告なし">10位 Amazon Kindle Paperwhite(8GB、広告なし)&lt;/h2>
+&lt;p>&lt;a href="https://amzn.asia/d/593V8Tg">Amazon&lt;/a>&lt;br>
+今年、突如「こんなん持ってたら動画ばっか見てあほになる！」とiPad miniを手放してしまったのですが、その後唯一困ったのが電子書籍の扱いです。&lt;br>
+BOOXを筆頭に中華タブを含めてE-ink系の端末をいろいろ検討してはいたのですが、いまいちピンとくるものがありませんでした。&lt;br>
+最終的にいつのまにかEPUB対応・USB Type-C化を果たしていたKindle Paperwhiteが要件にベストマッチしていたので、素直に購入しました。&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="und" dir="ltr">mng…… &lt;a href="https://t.co/ZrMROrQ1Am">pic.twitter.com/ZrMROrQ1Am&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1547937756575596544?ref_src=twsrc%5Etfw">July 15, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>解像度はiPadと比べると……な感じはもちろんありますが、とはいえベルセルクが普通に読めるくらいなので、期待ラインは大幅に越えてきた印象。&lt;br>
+へんてこガジェットの類ではなく定番商品なので、「まあ、こんなもんだよね」という感想になってしまいこの順位ですが、いい買い物でした。&lt;/p>
+&lt;h2 id="9位-ultra-pro-eclipse-スリーブ-pro-matte--r-line-カドまるスリーブ-インナー-横入れタイプ">9位 Ultra Pro Eclipse スリーブ PRO MATTE + R LINE カドまるスリーブ インナー 横入れタイプ&lt;/h2>
+&lt;p>単品でもよかったのですが、この組み合わせがよかったのでセットで9位。&lt;/p>
+&lt;h3 id="ultra-pro-eclipse-スリーブ-pro-matte">Ultra Pro Eclipse スリーブ PRO MATTE&lt;/h3>
+&lt;p>&lt;a href="https://amzn.asia/d/fxF8ozV">Amazon&lt;/a>&lt;br>
+今年は紙のマジックをわりとちゃんと遊んだこともあり、サプライ系、とくにスリーブをいろいろ試したのですが、いちばんしっくり来たのがこれでした。&lt;br>
+EclipseシリーズはUltra Proのハイエンド路線商品で、通常50枚500円のところ100枚1500円。通常スリーブより滑りがよく、ファローシャッフルがしやすいです。&lt;br>
+Ultimate Guard社のKATANAスリーブもよかったのですが、表面マットタイプがなくDiscord対戦で反射しまくって微妙だったのでメインにはしませんでした。&lt;br>
+他にはKMCのハイパーマットプレミアム、ブロッコリーのキャラスリ+KMCのアウターなども試しましたが、こちらは硬すぎてあまり好みな感じではありませんでした(適度にしなる程度が好み)。&lt;br>
+結局10年くらい使い続けてきたUltra Proをグレード上げて引き続きという形。 &lt;del>ウルプロの犬。&lt;/del>&lt;/p>
+&lt;h3 id="r-line-カドまるスリーブ-インナー-横入れタイプ">R LINE カドまるスリーブ インナー 横入れタイプ&lt;/h3>
+&lt;p>&lt;a href="http://www.rline.co.jp/">公式&lt;/a>&lt;br>
+そしてちゃんと遊ぶに伴って高額カードや両面カードを使う機会が増えたので、無用な傷・汚れ回避のためにインナースリーブも導入しました。&lt;br>
+カドまるの横入れにしたのは○れる屋で雑に買えるのと、YouTuberやVtuberのおすすめが多かったため。&lt;br>
+適度に薄く、多重スリーブ特有の異常なぶ厚さや硬さにならないのでいい感じ。&lt;/p>
+&lt;h2 id="8位-東京マルイ-cqbr-block-1">8位 東京マルイ CQBR BLOCK 1&lt;/h2>
+&lt;p>&lt;a href="https://www.tokyo-marui.co.jp/products/gas/machinegun/422">公式&lt;/a>&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">えがった &lt;a href="https://t.co/gJpk0k1Lxd">pic.twitter.com/gJpk0k1Lxd&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1576492965110763528?ref_src=twsrc%5Etfw">October 2, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>ガスブロ長物。盆栽遊びにサバゲーにとマルチに楽しめて満足度高め。&lt;br>
+もともとG&amp;amp;GのSR-30(電動)を持っていたのですが、お座敷遊びメインだと電動はちょっとね……というところがあって、乗り換えました。&lt;br>
+箱出しの状態で10月くらい？ に屋外フィールドで使いましたがゼロインをちゃんとすれば素直に当たります。リコイルも純正そのままの状態で普通に満足感あり。&lt;br>
+電動と違ってテイクダウンするとHAZARD 4のPlan-Bスリングバッグに入るので荷物が小さく済むのもポイント高いです。&lt;/p>
+&lt;h2 id="7位-alpha-ワンショルダーバッグ-molle">7位 ALPHA ワンショルダーバッグ MOLLE&lt;/h2>
+&lt;p>&lt;a href="https://edwin-mall.jp/shop/g/gTZ1086-001-00">公式通販&lt;/a>&lt;br>
+休日の外出用に購入。&lt;br>
+これにHAZARD 4のFlipポーチを取り付けて500mlペットボトルを収納できるようにしています。&lt;br>
+メインの収納部には最大でGPD Win MAXとブックカバーつきの早川文庫、手帳or財布が収まります(まったく伝わらない例え)。&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">最近導入したアルファの鞄、サイズのわりにUMPC・文庫本・手帳がメイン部分に入ってくれるのでよい &lt;a href="https://t.co/EJ2McxcCDm">pic.twitter.com/EJ2McxcCDm&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1584040809820659712?ref_src=twsrc%5Etfw">October 23, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>素材はALPHAのMA-1と同じものが使われているようで、手触りやクッション性がいいのもいい感じ。&lt;/p>
+&lt;h2 id="6位-トラベラーズノート-パスポートサイズ">6位 トラベラーズノート パスポートサイズ&lt;/h2>
+&lt;p>&lt;a href="https://www.travelers-company.com/products/trnote/starter-kit-passport">公式&lt;/a>&lt;br>
+手帳。&lt;br>
+ほぼ日手帳をまったく使わなかった私ですが、これはなぜか継続している……。&lt;br>
+下記の組み合わせで、予定管理+予備財布+Suicaケースみたいな運用をしています。極論これだけ持ってでかけても1日はOK。&lt;/p>
+&lt;ul>
+&lt;li>リフィル
+&lt;ul>
+&lt;li>&lt;a href="https://www.tfa-onlineshop.com/SHOP/14327006.html">週間フリー&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.tfa-onlineshop.com/SHOP/14370006.html">無罫&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>オプション
+&lt;ul>
+&lt;li>&lt;a href="https://www.tfa-onlineshop.com/SHOP/14334006.html">クラフトファイル&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.tfa-onlineshop.com/SHOP/14316006.html">ジッパー&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.tfa-onlineshop.com/SHOP/14248006.html">ポケットシール&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="5位-nothing-phone1">5位 Nothing Phone(1)&lt;/h2>
+&lt;p>&lt;a href="https://jp.nothing.tech/pages/phone-1">公式&lt;/a>&lt;br>
+年1ペースでスマホを増やすことに定評のある私ですが、今年もやりました。&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">new スマッホ &lt;a href="https://t.co/abPyE8r7Ag">pic.twitter.com/abPyE8r7Ag&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1585132838281584640?ref_src=twsrc%5Etfw">October 26, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>3機種ぶりにクラウドファンディングのリターンではないちゃんとしたマスプロ品をメイン機にした気がします。&lt;br>
+RAM 8GB、ストレージ128GBモデル。SoCがQualcomm Snapdragon 788+でザ・ミドルレンジなスペック。とはいえ3年の間もろもろ不安定な端末を使っていたこともあって、かなり快適です。&lt;br>
+最近はスマホのゲームもあんまりしないので、これでも持て余しているくらいかもしれない。&lt;br>
+なによりスケルトンでかっこいいしビカビカ光ってたのしい。&lt;br>
+買った直後に1万円ほど値上げして、スペックに対して価格が釣り合わなくなってしまった(個人的な感想)ので、デザインが気にいった人以外には勧められませんが、いい買い物でした。&lt;/p>
+&lt;h2 id="4位-akg-k702">4位 AKG K702&lt;/h2>
+&lt;p>&lt;a href="https://jp.akg.com/K702.html">公式&lt;/a>&lt;br>
+開放型ヘッドホン。KOSS PortaProが大破したので購入。&lt;br>
+仕事中ずっとつけていることもあったのですが、圧迫感や蒸れが少なく、不快になることがありませんでした。&lt;br>
+音の出方も疲れるようなものではなく、中高音がなだらかに盛り上がっている感じ。&lt;br>
+MiniXLRのリケーブルにも対応しているので、長く使っていけそう。&lt;br>
+順位は低めですが、家での作業用ヘッドホンとして強くおすすめです。&lt;/p>
+&lt;h2 id="3位-avermedia-live-gamer-extreme-2-gc550-plus">3位 AVerMedia Live Gamer EXTREME 2 (GC550 PLUS)&lt;/h2>
+&lt;p>&lt;a href="https://www.avermedia.co.jp/jp/product-detail/GC551">公式&lt;/a>&lt;/p>
+&lt;p>ゲームはPCメインにだいぶ移行しつつあるのですが、移植されてないタイトルや旧作に関してはまだまだ実機を使わないといけないわけです。&lt;br>
+ただ、デスクトップマシンが複数あってHDMI端子が大渋滞している現状、遊ぶたびに差し替えるのはとてもつらいものがあります。&lt;br>
+そこで、ゲームまわりはキャプチャーボードを経由することでゲーミングマシンと一本化してしまえという乱暴な発想から購入に至りました。&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">もしかして分配器と組み合わせることで完璧になったか &lt;a href="https://t.co/ZX6Bn6FdmP">pic.twitter.com/ZX6Bn6FdmP&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1593988379955597312?ref_src=twsrc%5Etfw">November 19, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>体感できるほどの遅延もなく、快適です。Bloodborneは普通に遊べました。&lt;br>
+OBSとの相性がちょっと悪そうなのだけがネック。&lt;/p>
+&lt;h2 id="2位-olympus現om-system-pen-e-p7--mzuiko-digital-17mm-f18">2位 OLYMPUS(現OM SYSTEM) PEN E-P7 + M.ZUIKO DIGITAL 17mm F1.8&lt;/h2>
+&lt;p>&lt;a href="https://jp.omsystem.com/product/dslr/pen/ep7/index.html">ボディ&lt;/a>&lt;br>
+&lt;a href="https://jp.omsystem.com/product/lens/single/premi/17_18/index.html">レンズ&lt;/a>&lt;/p>
+&lt;p>今年一番の衝動買い。&lt;br>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">買った &lt;a href="https://t.co/mYJj9wcyiA">pic.twitter.com/mYJj9wcyiA&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1531962602493861890?ref_src=twsrc%5Etfw">June 1, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;/p>
+&lt;p>なんもわかってない状態で、ヨドバシの店員さんに&lt;/p>
+&lt;ul>
+&lt;li>風景と犬、あと物メインで撮る&lt;/li>
+&lt;li>バイク乗るので小さいとうれしい&lt;/li>
+&lt;li>ぶっちゃけ衝動買いだからガチっぽくないやつ&lt;/li>
+&lt;/ul>
+&lt;p>と雑に伝えておすすめされた組み合わせで買いました。&lt;br>
+カラビナで腰に吊るして歩いても違和感ない軽さ・小ささになっていて持ち運びやすく、カラープロファイル機能やボディ内RAW現像があるので単品で遊べていい感じ。&lt;br>
+店員さんすごかった。&lt;/p>
+&lt;p>撮った写真はこんな感じです。&lt;br>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">疲れた &lt;a href="https://t.co/idmcnZuwaE">pic.twitter.com/idmcnZuwaE&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1535227623160578049?ref_src=twsrc%5Etfw">June 10, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;blockquote class="twitter-tweet">&lt;p lang="zxx" dir="ltr">&lt;a href="https://t.co/XcurpEHosN">pic.twitter.com/XcurpEHosN&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1537361424804360192?ref_src=twsrc%5Etfw">June 16, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">昼夜限界飲酒男性 &lt;a href="https://t.co/g7QkVdr4ps">pic.twitter.com/g7QkVdr4ps&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1545750943756455936?ref_src=twsrc%5Etfw">July 9, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;/p>
+&lt;h2 id="1位-lily58-pro">1位 Lily58 Pro&lt;/h2>
+&lt;p>&lt;a href="https://shop.yushakobo.jp/products/lily58-pro/">遊舎工房&lt;/a>&lt;br>
+HHKB Hybridを使っていたんですが、配列やメンテナンス性に不満が出てきたので自作キーボードに手を出しました。&lt;br>
+Vimユーザなので、5列がマストで、ついでに分割だと嬉しいよね、という基準でLily 58 Proを選択しました。&lt;br>
+キースイッチはKalih Speed Silver、キーキャップは基板に合わせて白系の&lt;a href="https://shop.yushakobo.jp/products/pg-pbt-geometry-keycaps-set">PG PBT Geometry keycaps set&lt;/a>を選択しました。&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">できた。テーマはかわいいです。 &lt;a href="https://t.co/twNTVMpzSL">pic.twitter.com/twNTVMpzSL&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1508127757938880516?ref_src=twsrc%5Etfw">March 27, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>ダイオードのはんだ付けがちょっとしんどいところはありましたが、使い始めてからはとても快適です。&lt;br>
+キー数が絶妙で、デフォルトのレイヤーで必要なキーはすべてカバーできるようになっていて、通常キーボードからの移行がとても楽でした。&lt;br>
+キー配置もよくできていて、使用中は自然に腕を開くことになるので猫背になりにくく、肩こりや疲労感が軽減されます。&lt;/p>
+&lt;p>自作キーボード、おすすめです。&lt;/p>
+&lt;hr>
+&lt;h2 id="おまけ">おまけ&lt;/h2>
+&lt;p>TOP10には入らなかったけどよかったもの &amp;amp; 物品以外&lt;/p>
+&lt;h3 id="wilder-tactical-minimalist-edc-belt">Wilder Tactical Minimalist EDC Belt&lt;/h3>
+&lt;p>ベルト周りを構築するときに買ったベルト。&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">なんだこれわ…… &lt;a href="https://t.co/8zko6tJzzk">pic.twitter.com/8zko6tJzzk&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1572565490152935424?ref_src=twsrc%5Etfw">September 21, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>サバゲでしか使わないのに1万ちょいか……と思いながら買ったところ、サバゲ以外でも使いやすくて普通にいい買い物でした。&lt;br>
+バイクやキャンプやってるとベルト周りにいろいろぶら下げがちなので、単純に強度の高いベルトは便利。&lt;/p>
+&lt;h3 id="神林長平-アグレッサーズ-サイン会">神林長平 アグレッサーズ サイン会&lt;/h3>
+&lt;p>ずっと読んでます！ と伝えられたうえにサインまで貰えた。&lt;br>
+&lt;blockquote class="twitter-tweet">&lt;p lang="zxx" dir="ltr">&lt;a href="https://t.co/NCk8pP0VdU">pic.twitter.com/NCk8pP0VdU&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1517811599272472577?ref_src=twsrc%5Etfw">April 23, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;blockquote class="twitter-tweet">&lt;p lang="qme" dir="ltr"> &lt;a href="https://t.co/myhEIVKCAM">pic.twitter.com/myhEIVKCAM&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1530832339328466944?ref_src=twsrc%5Etfw">May 29, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;/p>
+&lt;h3 id="ヴェールのリリアナ">ヴェールのリリアナ&lt;/h3>
+&lt;p>環境に微妙に存在を許されていない感はありますが、3マナからテンポを稼げるのは相変わらずえらい。&lt;/p>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">懺悔します　やすかったのでつい &lt;a href="https://t.co/3QJ3noV0rH">pic.twitter.com/3QJ3noV0rH&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1574018106342932481?ref_src=twsrc%5Etfw">September 25, 2022&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;p>これといい秘密を掘り下げる者やヴェンディリオン三人衆なんかといい、あのとき憧れていたカードがインフレの波に飲まれて評価が落ちているのは悲しい。&lt;br>
+ただ、当時は手が届かなかったものをいまようやく買えて、実戦でなんとか使っているという体験は相対的にカードパワーが落ちている現実を帳消しにできるくらいにはいいです。&lt;br>
+マッチアップによってはサイドアウトするけど。&lt;/p></content></item><item><title>Dagger.ioを使ってみた</title><link>/posts/build-ci-cd-pipeline-with-dagger/</link><pubDate>Mon, 21 Nov 2022 00:00:00 +0900</pubDate><guid>/posts/build-ci-cd-pipeline-with-dagger/</guid><description>前置き Dagger.ioというCI/CDパイプラインエンジンがある。 世の中にはGitHub ActionsやAWS CodeBuild, Circle CIなど、さまざまなCI/CDサービスがある。これらはそれぞれ記法が違ったり実行環境に制限があったりと、サービス提供者ごとに良くも悪くも差別化がされている。 どのサービスも使いやすく、便利だったりするが、トレードオフとしてローカルでワークフローのテストができなかったり、他のサービスへの</description><content>&lt;h2 id="前置き">前置き&lt;/h2>
 &lt;p>&lt;a href="https://dagger.io/">Dagger.io&lt;/a>というCI/CDパイプラインエンジンがある。&lt;/p>
 &lt;p>世の中にはGitHub ActionsやAWS CodeBuild, Circle CIなど、さまざまなCI/CDサービスがある。これらはそれぞれ記法が違ったり実行環境に制限があったりと、サービス提供者ごとに良くも悪くも差別化がされている。&lt;br>
 どのサービスも使いやすく、便利だったりするが、トレードオフとしてローカルでワークフローのテストができなかったり、他のサービスへの移行&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>が難しかったりする。&lt;br>
