@@ -1,4 +1,440 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>メモ on blog</title><link>/tags/%E3%83%A1%E3%83%A2/</link><description>Recent content in メモ on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Fri, 02 Sep 2022 00:00:00 +0900</lastBuildDate><atom:link href="/tags/%E3%83%A1%E3%83%A2/index.xml" rel="self" type="application/rss+xml"/><item><title>Cloudformationの小技</title><link>/posts/cloudformation-tips/</link><pubDate>Fri, 02 Sep 2022 00:00:00 +0900</pubDate><guid>/posts/cloudformation-tips/</guid><description>最近Cloudformationを書く機会が増えてterraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあっていて、それに伴い小技みたいなものを人に話す機会も増えたので</description><content>&lt;p>最近Cloudformationを書く機会が増えて&lt;del>terraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあって&lt;/del>いて、それに伴い小技みたいなものを人に話す機会も増えたので、メモしておく。&lt;br>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>メモ on blog</title><link>/tags/%E3%83%A1%E3%83%A2/</link><description>Recent content in メモ on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 14 Jan 2023 14:30:00 +0900</lastBuildDate><atom:link href="/tags/%E3%83%A1%E3%83%A2/index.xml" rel="self" type="application/rss+xml"/><item><title>2023年 令和最新版 archlinux インストールオレオレ手順</title><link>/posts/install-archlinux-v2023/</link><pubDate>Sat, 14 Jan 2023 14:30:00 +0900</pubDate><guid>/posts/install-archlinux-v2023/</guid><description>これはなにか Windows 11が入っているマシンにarchlinuxを追加してデュアルブート設定までやったときのメモ。 最低限のツールを設定して、デスクトップ環境を立ち上げるところまでやっている。便利な開発系ツールのインストールやおしゃれ設定などはしていない。 将来的に自動化するときに楽できるように、細かくコマンドを書いておくという趣旨。 背景 年末年始に半額だったので、SEIL/x86 Ayameを衝動買いしたが、そ</description><content>&lt;h2 id="これはなにか">これはなにか&lt;/h2>
+&lt;p>Windows 11が入っているマシンにarchlinuxを追加してデュアルブート設定までやったときのメモ。&lt;br>
+最低限のツールを設定して、デスクトップ環境を立ち上げるところまでやっている。便利な開発系ツールのインストールやおしゃれ設定などはしていない。&lt;/p>
+&lt;p>&lt;a href="https://yakst.com/ja/posts/5564">将来的に自動化するときに楽できるように、細かくコマンドを書いておく&lt;/a>という趣旨。&lt;/p>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>年末年始に半額だったので、&lt;a href="https://www.seil.jp/product/x86ayame.html">SEIL/x86 Ayame&lt;/a>を衝動買いしたが、それを動かすマシンがなかった。&lt;br>
+せっかくなのでまたProxmoxサーバを組んでもいいかなと思ったが、試算したところちょっと予算オーバー気味だったので、archlinuxデスクトップマシンを潰してそちらをProxmoxサーバに切り替えることにした。&lt;br>
+ただ、linuxデスクトップが自宅から消滅するといろいろと不便なのは目に見えていたので、Windowsマシンにメモリとストレージを盛ってarchlinuxをデュアルブートすることにした。&lt;/p>
+&lt;h2 id="ハードウェア構成">ハードウェア構成&lt;/h2>
+&lt;p>THE 型落ちみたいな。&lt;br>
+Ryzen 7000番台とSocket AM5マザボがもうちょい安くなったら買い換えたい。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>種類&lt;/th>
+&lt;th>名称&lt;/th>
+&lt;th>備考&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>MB&lt;/td>
+&lt;td>ASUS PRIME B450-PLUS&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CPU&lt;/td>
+&lt;td>AMD Ryzen 7 3800X&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>GPU&lt;/td>
+&lt;td>ZOTAC GAMING GeForce GTX 1660 Ti 6GB GDDR6 / ZT-T16610F-10L&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Memory&lt;/td>
+&lt;td>CK8GX4-D4U3200H 8GB*2&lt;/td>
+&lt;td>BTOで買ったときに刺さってたやつ&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Memory&lt;/td>
+&lt;td>CORSAIR VENGEANCE LPX DDR4-3200 16GB*2&lt;/td>
+&lt;td>追加購入&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Storage&lt;/td>
+&lt;td>WD Green WDS240G2G0A&lt;/td>
+&lt;td>240GB, SSD&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Storage&lt;/td>
+&lt;td>WD20EZAZ-RT&lt;/td>
+&lt;td>2TB, HDD&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Storage&lt;/td>
+&lt;td>KIOXIA EXCERIA PLUS G2 SSD-CK500N3PG2/N&lt;/td>
+&lt;td>500GB, M.2, 追加購入&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Storage&lt;/td>
+&lt;td>KIOXIA EXCERIA SSD-CK960S/N&lt;/td>
+&lt;td>960GB, SSD, 追加購入&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Storage&lt;/td>
+&lt;td>Seagate BarraCuda ST2000DM008&lt;/td>
+&lt;td>2TB, HDD, 追加購入&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>PSU&lt;/td>
+&lt;td>CWT GPT500SATC&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="ストレージ構成">ストレージ構成&lt;/h2>
+&lt;p>事前にWindows 11をクリーンインストールしている。&lt;br>
+Windows 11側では &lt;code>/dev/sdc&lt;/code>, &lt;code>/dev/sdd&lt;/code>, &lt;code>/dev/nvme0n1&lt;/code> を使っている。&lt;br>
+今回は、以前Windows側で使っていた &lt;code>/dev/sda&lt;/code>, &lt;code>/dev/sdb&lt;/code> にarchlinuxをインストールする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ lsblk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINTS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sda 8:0 &lt;span style="color:#ae81ff">0&lt;/span> 223.6G &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdb 8:16 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdc 8:32 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> disk &lt;span style="color:#75715e"># Windows D ドライブ&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─sdc1 8:33 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sdc2 8:34 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdd 8:48 &lt;span style="color:#ae81ff">0&lt;/span> 894.3G &lt;span style="color:#ae81ff">0&lt;/span> disk &lt;span style="color:#75715e"># Windows E ドライブ&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─sdd1 8:49 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sdd2 8:50 &lt;span style="color:#ae81ff">0&lt;/span> 894.2G &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>nvme0n1 259:0 &lt;span style="color:#ae81ff">0&lt;/span> 465.8G &lt;span style="color:#ae81ff">0&lt;/span> disk &lt;span style="color:#75715e"># Windows C ドライブ&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p1 259:1 &lt;span style="color:#ae81ff">0&lt;/span> 100M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p2 259:2 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p3 259:3 &lt;span style="color:#ae81ff">0&lt;/span> 465G &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─nvme0n1p4 259:4 &lt;span style="color:#ae81ff">0&lt;/span> 668M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="インストール手順">インストール手順&lt;/h2>
+&lt;p>refs: &lt;a href="https://wiki.archlinux.jp/index.php/%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%82%AC%E3%82%A4%E3%83%89">インストールガイド - ArchWiki&lt;/a>&lt;/p>
+&lt;h3 id="archisoでの作業">archisoでの作業&lt;/h3>
+&lt;p>archisoは &lt;code>archlinux-2023.01.01-x86_64.iso&lt;/code> を使った。&lt;/p>
+&lt;h4 id="ipアドレスを割り振る">IPアドレスを割り振る&lt;/h4>
+&lt;p>我が家はコンセントに繋がるものは固定IP、バッテリ駆動できるものはDHCPを使うようにしている。&lt;br>
+今回はデスクトップマシンなので、固定IPの設定が必要になる。&lt;/p>
+&lt;p>refs: &lt;a href="https://wiki.archlinux.jp/index.php/%E3%83%8D%E3%83%83%E3%83%88%E3%83%AF%E3%83%BC%E3%82%AF%E8%A8%AD%E5%AE%9A">ネットワーク設定 - ArchWiki&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ ip link
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ ip link set eth0 up &lt;span style="color:#75715e"># 有効化&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ ip address add 192.168.11.16/24 broadcast + dev eth0 &lt;span style="color:#75715e"># IPアドレスを割り振る&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="疎通確認">疎通確認&lt;/h4>
+&lt;p>一応繋がるかどうか見ておく。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ ping -c &lt;span style="color:#ae81ff">5&lt;/span> 192.168.11.1 &lt;span style="color:#75715e"># GW&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ ping -c &lt;span style="color:#ae81ff">5&lt;/span> 192.168.11.5 &lt;span style="color:#75715e"># NAS&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ ping -c &lt;span style="color:#ae81ff">5&lt;/span> archlinux.jp &lt;span style="color:#75715e"># 外&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="ストレージ確認">ストレージ確認&lt;/h4>
+&lt;p>&lt;code>lsblk&lt;/code> を使って、ストレージが正しく認識されているかどうかを一応見ておく。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ lsblk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINTS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sda 8:0 &lt;span style="color:#ae81ff">0&lt;/span> 223.6G &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdb 8:16 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdc 8:32 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> disk &lt;span style="color:#75715e"># Windows D ドライブ&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─sdc1 8:33 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sdc2 8:34 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdd 8:48 &lt;span style="color:#ae81ff">0&lt;/span> 894.3G &lt;span style="color:#ae81ff">0&lt;/span> disk &lt;span style="color:#75715e"># Windows E ドライブ&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─sdd1 8:49 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sdd2 8:50 &lt;span style="color:#ae81ff">0&lt;/span> 894.2G &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>nvme0n1 259:0 &lt;span style="color:#ae81ff">0&lt;/span> 465.8G &lt;span style="color:#ae81ff">0&lt;/span> disk &lt;span style="color:#75715e"># Windows C ドライブ&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p1 259:1 &lt;span style="color:#ae81ff">0&lt;/span> 100M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p2 259:2 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p3 259:3 &lt;span style="color:#ae81ff">0&lt;/span> 465G &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─nvme0n1p4 259:4 &lt;span style="color:#ae81ff">0&lt;/span> 668M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="パーティショニング">パーティショニング&lt;/h4>
+&lt;p>refs: &lt;a href="https://wiki.archlinux.jp/index.php/%E3%83%91%E3%83%BC%E3%83%86%E3%82%A3%E3%82%B7%E3%83%A7%E3%83%8B%E3%83%B3%E3%82%B0">パーティショニング - ArchWiki&lt;/a>&lt;/p>
+&lt;p>今回はこんな感じにする。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>パーティション&lt;/th>
+&lt;th>パス&lt;/th>
+&lt;th>備考&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>/dev/nvme0n1p1&lt;/td>
+&lt;td>/boot/efi&lt;/td>
+&lt;td>Windowsのものを使う&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>/dev/sda1&lt;/td>
+&lt;td>/boot&lt;/td>
+&lt;td>300MiBくらいあれば十分だけど、気分で512MiB振る&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>/dev/sda2&lt;/td>
+&lt;td>/&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>/dev/sdb1&lt;/td>
+&lt;td>/home&lt;/td>
+&lt;td>/home以下は分けたほうがいいと聞くので、分ける&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>&lt;code>fdisk&lt;/code> を使ってパーティショニングを行なう。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ fdisk /dev/sda
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># ここからfdiskのプロンプト&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>n &lt;span style="color:#75715e"># あたらしいパーティションを切る&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Partition Number: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>First Sector: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Last Sector: +512M
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>n
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Partition Number: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>First Sector: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Last Sector: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>w &lt;span style="color:#75715e"># 書き込んでおわり&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ fdisk /dev/sdb
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># ここからfdiskのプロンプト&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>n &lt;span style="color:#75715e"># あたらしいパーティションを切る&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Partition Number: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>First Sector: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Last Sector: &amp;lt;CR&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>w &lt;span style="color:#75715e"># 書き込んでおわり&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="パーティショニングできてるか確認">パーティショニングできてるか確認&lt;/h4>
+&lt;p>こんな感じになるはず。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ lbslk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINTS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sda 8:0 &lt;span style="color:#ae81ff">0&lt;/span> 223.6G &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─sda1 8:1 &lt;span style="color:#ae81ff">0&lt;/span> 512M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sda2 8:2 &lt;span style="color:#ae81ff">0&lt;/span> 223.1G &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdb 8:16 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sdb1 8:17 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdc 8:32 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─sdc1 8:33 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sdc2 8:34 &lt;span style="color:#ae81ff">0&lt;/span> 1.8T &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sdd 8:48 &lt;span style="color:#ae81ff">0&lt;/span> 894.3G &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─sdd1 8:49 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─sdd2 8:50 &lt;span style="color:#ae81ff">0&lt;/span> 894.2G &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>nvme0n1 259:0 &lt;span style="color:#ae81ff">0&lt;/span> 465.8G &lt;span style="color:#ae81ff">0&lt;/span> disk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p1 259:1 &lt;span style="color:#ae81ff">0&lt;/span> 100M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p2 259:2 &lt;span style="color:#ae81ff">0&lt;/span> 16M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├─nvme0n1p3 259:3 &lt;span style="color:#ae81ff">0&lt;/span> 465G &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└─nvme0n1p4 259:4 &lt;span style="color:#ae81ff">0&lt;/span> 668M &lt;span style="color:#ae81ff">0&lt;/span> part
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="btrfsにする">btrfsにする&lt;/h4>
+&lt;p>refs: &lt;a href="https://wiki.archlinux.jp/index.php/Btrfs">Btrfs - ArchWiki&lt;/a>&lt;/p>
+&lt;p>これまで漫然と &lt;code>ext4&lt;/code> を使っていたけど、せっかくなので &lt;code>btrfs&lt;/code> を使うことにする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ mkfs.fat -F &lt;span style="color:#ae81ff">32&lt;/span> /dev/sda1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkfs.btrfs -L root /dev/sda2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkfs.btrfs -L home /dev/sdb1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="マウントする">マウントする&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ mount /dev/sda2 /mnt
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir /mnt/boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mount /dev/sda1 /mnt/boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir /mnt/boot/efi
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mount /dev/nvme0n1p1 /mnt/boot/efi &lt;span style="color:#75715e"># Windowsのespをマウント&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir /mnt/home
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mount /dev/sdb1 /mnt/home
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="jp-mirrorにしておく">Jp Mirrorにしておく&lt;/h4>
+&lt;p>一応日本のミラーを向かせる。&lt;br>
+refs: &lt;a href="https://wiki.archlinux.jp/index.php/%E3%83%9F%E3%83%A9%E3%83%BC">ミラー - ArchWiki&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ vim /etc/pacman.d/mirrorlist
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 一番上に追加する&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Server = http://ftp.tsukuba.wide.ad.jp/Linux/archlinux/$repo/os/$arch&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="必要なものを入れる">必要なものを入れる&lt;/h4>
+&lt;p>とりあえず最低限必要なものを &lt;code>pacstrap&lt;/code> で入れる。&lt;br>
+今回はデスクトップ用途なので、&lt;a href="https://github.com/zen-kernel/zen-kernel">zen-kernel&lt;/a>を選択している。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ pacstrap -K /mnt base linux-zen linux-firmware
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="fstab作る">fstab作る&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ genfstab -U /mnt &amp;gt;&amp;gt; /mnt/etc/fstab
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cat /mnt/etc/fstab &lt;span style="color:#75715e"># 内容確認&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="arch-chrootする">arch-chrootする&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ arch-chroot /mnt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="arch-chrootでの作業">arch-chrootでの作業&lt;/h3>
+&lt;h4 id="タイムゾーン時刻設定">タイムゾーン&amp;amp;時刻設定&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% hwclock --systohc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="作業用にvimを入れる">作業用にvimを入れる&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% pacman -S vim
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="locale-生成">locale 生成&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% vim /etc/locale.gen
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># en_US.UTF-8 ja_JP.UTF-8 をコメント解除する&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% locale-gen
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% vim /etc/locale.conf &lt;span style="color:#75715e"># 中身を LANG=ja_JP.UTF-8 にする&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="hostnameを変更">hostnameを変更&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% vim /etc/hostname
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="etchostsを書く">/etc/hostsを書く&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>vim /etc/hosts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code class="language-/etc/hosts" data-lang="/etc/hosts">127.0.0.1 localhost
+::1 localhost
+127.0.0.1 ${ここにhostnameで設定したのを同じものを書く}
+&lt;/code>&lt;/pre>&lt;h4 id="パッケージ追加">パッケージ追加&lt;/h4>
+&lt;p>これから作るユーザのデフォルトシェルを &lt;code>zsh&lt;/code> にしたいのでその関連パッケージを入れる。&lt;br>
+また、入れたほうがよさそうなものもまとめて入れておく。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% pacman -S linux-zen-docs linux-zen-headers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% pacman -S zsh zsh-completions
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% pacman -S base-devel
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% pacman -S btrfs-progs
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="再ビルドしておく">再ビルドしておく&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% mkinitcpio -P
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="rootのパスワードを設定する">rootのパスワードを設定する&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% passwd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="ブートローダのインストール">ブートローダのインストール&lt;/h4>
+&lt;p>grubをとりあえず入れる。&lt;br>
+この段階だとなぜか &lt;code>os-prober&lt;/code> が &lt;code>/dev/nvme0n1p1&lt;/code> を認識してくれず、Windows BootloaderをGRUBメニューに追加できないので、設定は後ほど行う。&lt;br>
+この段階で一度Windowsがブートできなくなるので、なにかWindowsでやっておくべきことがあるなら済ませておく。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% pacman -S grub efibootmgr
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% grub-install --target&lt;span style="color:#f92672">=&lt;/span>x86_64-efi --efi-directory&lt;span style="color:#f92672">=&lt;/span>/boot/efi --bootloader-id&lt;span style="color:#f92672">=&lt;/span>GRUB
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="再起動">再起動&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% umount -R /mnt
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% reboot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>再起動したら、archisoの入ったUSBフラッシュメモリを取り外しておく。&lt;/p>
+&lt;h3 id="archlinuxroot">archlinux(root)&lt;/h3>
+&lt;p>ここから先はrootユーザで作業する。&lt;/p>
+&lt;h4 id="systemdでネットワーク設定をする">systemdでネットワーク設定をする&lt;/h4>
+&lt;p>refs: &lt;a href="https://wiki.archlinux.jp/index.php/Systemd-networkd">systemd-networkd - ArchWiki&lt;/a>&lt;/p>
+&lt;p>再起動した段階ではネットワーク設定が消えているので、外に通信できない。&lt;br>
+接続のため、 &lt;code>systemd-networkd&lt;/code>, &lt;code>systemd-resolved&lt;/code> を使うので、その設定をする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% vim /etc/systemd/network/20-wired.network
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-network" data-lang="network">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">[Match]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Name&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">enp4s0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">[Network]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Address&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">192.168.11.16/24&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Gateway&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">192.168.11.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">DNS&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">192.168.11.1&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>起動・有効化までする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% systemctl start systemd-networkd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% systemctl start systemd-resolved
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% systemctl enable systemd-networkd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% systemctl enable systemd-resolved
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="windowsをgrubのメニューに追加する">WindowsをGRUBのメニューに追加する&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% pacman -S os-prober
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% grub-mkconfig -o /boot/grub/grub.cfg &lt;span style="color:#75715e"># WindowsがGRUBに登録される&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="windows-updateが楽になるようにデフォルトの選択肢をwindowsに">Windows Updateが楽になるように、デフォルトの選択肢をWindowsに&lt;/h4>
+&lt;p>Windows Updateで再起動を複数回要求されたときに、GRUBデフォルトの選択肢がarchlinuxだと放置できない。&lt;br>
+月1で面倒な思いをしたくないので、デフォルトをWindowsに変えておく。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% vim /etc/default/grub &lt;span style="color:#75715e"># 今回は3番目がWindowsなので、GRUB_DEFAULT=2&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% grub-mkconfig -o /boot/grub/grub.cfg &lt;span style="color:#75715e"># Windowsがデフォルトになる&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="一般ユーザを追加">一般ユーザを追加&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% useradd -m -G wheel -s /usr/bin/zsh kei
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% passwd kei &lt;span style="color:#75715e"># パスワードを設定する&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="追加したユーザがsudoできるようにする">追加したユーザがsudoできるようにする&lt;/h4>
+&lt;p>ここから先はrootで作業したくないので、権限を振る。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% pacman -S sudo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% EDITOR&lt;span style="color:#f92672">=&lt;/span>vim visudo &lt;span style="color:#75715e"># %sudo ALL=(ALL:ALL) ALL にする&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% groupadd sudo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% usermod -aG sudo kei
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="archlinuxuser">archlinux(user)&lt;/h3>
+&lt;p>先ほど作成した &lt;code>sudo&lt;/code> ができるユーザでログインしなおす。&lt;/p>
+&lt;h4 id="最低限のデスクトップ環境を構築する">最低限のデスクトップ環境を構築する&lt;/h4>
+&lt;p>&lt;a href="https://github.com/kei-s16/dotfiles">dotfiles&lt;/a>をGitHubから拾ってくるためにデスクトップ環境があると便利なので、そのためにまず最低限のパッケージを入れる。&lt;br>
+ディスプレイマネージャには&lt;a href="https://wiki.archlinux.jp/index.php/SDDM">sddm&lt;/a>を、ウィンドウマネージャには&lt;a href="https://i3wm.org/">i3&lt;/a>を使う。&lt;br>
+日本語入力やオーディオまわりなどはあとから設定する。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo pacman -S xorg sddm i3 xf86-video-nouveau mesa alacritty
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-emoji &lt;span style="color:#75715e"># LANG=ja_JP.UTF-8しているので日本語フォントを入れておく&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ sudo systemctl enable sddm
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>i3configを編集し、alacrittyを呼び出せるようにするのを忘れない。&lt;br>
+忘れて起動してしまい、ターミナルが起動できなくなった場合は &lt;code>Ctrl + Alt + F[2-6]&lt;/code> で黒い画面に戻れるので、そこで設定を変える。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo reboot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="archlinuxuser-xorg">archlinux(user-xorg)&lt;/h3>
+&lt;h4 id="github連携してdotfiles引っ張ってこれるようにする">GitHub連携してdotfiles引っ張ってこれるようにする&lt;/h4>
+&lt;p>firefoxとopensshを入れて、git cloneできるようにする。&lt;br>
+鍵追加などの手順は&lt;a href="https://docs.github.com/ja/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account">公式ドキュメント&lt;/a>に従う。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo pacman -S git openssh firefox
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="paruを入れる">paruを入れる&lt;/h4>
+&lt;p>これまでAURヘルパーには &lt;code>yay&lt;/code> を使っていたが、今回は気分で &lt;code>paru&lt;/code> を使ってみることにした。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo pacman -S rustup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ rustup install nightly &lt;span style="color:#75715e"># 好み&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ rustup default nightly
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ git clone https://aur.archlinux.org/paru.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd paru
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ makepkg -si
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="デスクトップ環境で使うものをまるっと入れる">デスクトップ環境で使うものをまるっと入れる&lt;/h4>
+&lt;p>&lt;a href="https://github.com/kei-s16/dotfiles/blob/2a6965dffc7dc9726cdcbbf8c250d82da899902a/.config/i3/config#L183-L209">i3の設定ファイル&lt;/a>に書いてあるものを中心にインストールする。&lt;br>
+また、i3は最新版の機能を使いたいので、AURにある &lt;code>i3-git&lt;/code> に差し替える。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo pacman -S nemo nemo-share gvfs-smb rofi flameshot pulseaudio pavucontrol xsel feh
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ paru -S conky rofi-greenclip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ paru -S ttf-rounded-mplus
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ paru -S i3-git &lt;span style="color:#75715e"># gaps使いたいので&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>パッケージ&lt;/th>
+&lt;th>説明&lt;/th>
+&lt;th>備考&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>nemo&lt;/td>
+&lt;td>ファイラー&lt;/td>
+&lt;td>nemo-share, gvfs-smb を入れることでsambaサーバに接続できるようになる&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>rofi&lt;/td>
+&lt;td>アプリケーションランチャー(+α)&lt;/td>
+&lt;td>rofi-greenclip を入れて、クリップボード機能を追加している&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>flameshot&lt;/td>
+&lt;td>スクリーンショットツール&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>feh&lt;/td>
+&lt;td>画像ビューア&lt;/td>
+&lt;td>壁紙表示ツールとして使っている&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>pavucontrol&lt;/td>
+&lt;td>オーディオまわりの管理ツール&lt;/td>
+&lt;td>pulseaudioが必要&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>xsel&lt;/td>
+&lt;td>クリップボードツール&lt;/td>
+&lt;td>neovim でクリップボード連携するために入れている&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>conky&lt;/td>
+&lt;td>リソースモニタ&lt;/td>
+&lt;td>おしゃれツールだけどデフォルトで使っているのでおしゃれじゃない&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h4 id="日本語入力skk">日本語入力(skk)&lt;/h4>
+&lt;p>日本語入力ができるようにする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo pacman -Ss fcitx5-skk fcitx5-configtool fcitx5-gtk fcitx5-qt skk-jisyo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>i3のconfigに書いてある分でいい感じに起動してくれるはずだったが、今回なぜか起動してくれなかったので &lt;code>.xprofile&lt;/code> を追加で書いた。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ touch ~/.xprofile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code class="language-~/.xprofile" data-lang="~/.xprofile">export GTK_IM_MODULE=fcitx5
+export QT_IM_MODULE=fcitx5
+export XMODIFIERS=&amp;#34;@im=fcitx5&amp;#34;
+&lt;/code>&lt;/pre>&lt;h4 id="neovim">neovim&lt;/h4>
+&lt;p>エディタには &lt;code>neovim&lt;/code> を使っている。&lt;br>
+HEADを使うので、GitHubからソースを落としてきてビルドする。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo pacman -S cmake unzip ninja tree-sitter curl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ clone git@github.com:neovim/neovim.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ make
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ sudo make install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>また、使っているプラグインは &lt;code>deno&lt;/code> を要求するので、&lt;code>asdf&lt;/code> を使ってインストールしておく。
+&lt;code>~/.zshenv&lt;/code> に下記のように書いてから、もろもろをインストールする。&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-~/.zshenv" data-lang="~/.zshenv"># for asdf
+. /opt/asdf-vm/asdf.sh
+&lt;/code>&lt;/pre>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ paru -S asdf-vm
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ source ~/.zshenv
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ asdf plugin-add deno https://github.com/asdf-community/asdf-deno.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ asdf install deno 1.29.2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ asdf global deno 1.29.2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="dotfilesの展開">dotfilesの展開&lt;/h4>
+&lt;p>dotfilesを展開する。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ git clone git@github.com:kei-s16/dotfiles.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ rm -rfv ~/.config &lt;span style="color:#75715e"># ~/.config/i3/config とかがあって、dotfilesが撒けないので&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd dotfiles
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ make
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ make skk &lt;span style="color:#75715e"># skk辞書のダウンロード&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上記のコマンドを実行したあと、ログインしなおすと設定が反映される。&lt;br>
+必要ならこの時neovimを起動して、プラグインのインストールを済ませておく。&lt;/p>
+&lt;h4 id="時間系">時間系&lt;/h4>
+&lt;p>デュアルブートだとどちらかのOSの時間が9時間ずれてしまう。&lt;br>
+ArchWikiに従い、UTCを使うように設定する。&lt;br>
+refs: &lt;a href="https://wiki.archlinux.jp/index.php/Windows_%E3%81%A8_Arch_%E3%81%AE%E3%83%87%E3%83%A5%E3%82%A2%E3%83%AB%E3%83%96%E3%83%BC%E3%83%88">Windows と Arch のデュアルブート - ArchWiki&lt;/a>&lt;/p>
+&lt;p>時刻合わせには &lt;code>ntpd&lt;/code> を使う。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-zsh" data-lang="zsh">&lt;span style="display:flex;">&lt;span>$ sudo pacman -S ntp
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ sudoedit /etc/ntp.conf &lt;span style="color:#75715e"># jstにする&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ sudo ntpd &lt;span style="color:#75715e"># いったん合わせておく&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ sudo systemctl enable ntpd &lt;span style="color:#75715e"># systemdに登録する&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="終わり">終わり&lt;/h3>
+&lt;p>再起動してWindowsとarchlinux、どちらも問題なく起動することが確認できたら終わり。&lt;/p>
+&lt;h2 id="今回のやらかし">今回のやらかし&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>/dev/nvme0n1p1&lt;/code> を &lt;code>/boot&lt;/code> にマウントした
+&lt;ul>
+&lt;li>当然容量不足で &lt;code>vmlinuz-linux&lt;/code> や &lt;code>initramfs-linux-zen.img&lt;/code> が配置できないので困る&lt;/li>
+&lt;li>修正は正しくマウントしなおしてゴミを消すだけだったので、致命傷ではなかった&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul></content></item><item><title>Cloudformationの小技</title><link>/posts/cloudformation-tips/</link><pubDate>Fri, 02 Sep 2022 00:00:00 +0900</pubDate><guid>/posts/cloudformation-tips/</guid><description>最近Cloudformationを書く機会が増えてterraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあっていて、それに伴い小技みたいなものを人に話す機会も増えたので</description><content>&lt;p>最近Cloudformationを書く機会が増えて&lt;del>terraformではなにも考えなくてもよかったのにCloudformationだとものによってはDependsOnを使って依存関係を明示的に指定してあげる必要があったりだとか、おなじCloudformationでもSAMだと方言がつらかったりだとかする現実と戦わなければいけないハメにあって&lt;/del>いて、それに伴い小技みたいなものを人に話す機会も増えたので、メモしておく。&lt;br>
 Cloudformationをちゃんと触り始めて2週間くらいなので、もっといい方法あるよとか間違ってるよとかあったら教えてください。Twitterとかで。&lt;/p>
 &lt;h2 id="parameterを選択式にしたい">Parameterを選択式にしたい&lt;/h2>
 &lt;p>AllowedValuesを指定してあげることで、マネジメントコンソールのParameter欄を入力式から選択式にできる&lt;/p>
