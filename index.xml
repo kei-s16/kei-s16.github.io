@@ -1,4 +1,50 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 14 Jan 2023 14:30:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>2023年 令和最新版 archlinux インストールオレオレ手順</title><link>/posts/install-archlinux-v2023/</link><pubDate>Sat, 14 Jan 2023 14:30:00 +0900</pubDate><guid>/posts/install-archlinux-v2023/</guid><description>これはなにか Windows 11が入っているマシンにarchlinuxを追加してデュアルブート設定までやったときのメモ。 最低限のツールを設定して、デスクトップ環境を立ち上げるところまでやっている。便利な開発系ツールのインストールやおしゃれ設定などはしていない。 将来的に自動化するときに楽できるように、細かくコマンドを書いておくという趣旨。 背景 年末年始に半額だったので、SEIL/x86 Ayameを衝動買いしたが、そ</description><content>&lt;h2 id="これはなにか">これはなにか&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>blog</title><link>/</link><description>Recent content on blog</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sun, 15 Jan 2023 20:15:00 +0900</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>SEIL/x86 AyameをProxmoxにインストールする</title><link>/posts/install-seil-x86-ayame-on-proxmox/</link><pubDate>Sun, 15 Jan 2023 20:15:00 +0900</pubDate><guid>/posts/install-seil-x86-ayame-on-proxmox/</guid><description>これはなんだ 年末年始に安くなっていたので、SEIL/x86 Ayameのスタンダードライセンスを買った。 用途も決めずに買ったので、なにをするというわけでもないが、とりあえず触ってみようということでProxmoxにインストールすることにした。 これはその時の手順メモ。 * おことわり * ProxmoxはSEIL/x86 Ayameのサポート環境ではありません。 インストール手順 tl;dr : KVM仮想マシンイメージから起動</description><content>&lt;h2 id="これはなんだ">これはなんだ&lt;/h2>
+&lt;p>年末年始に安くなっていたので、&lt;a href="https://www.seil.jp/product/x86ayame.html">SEIL/x86 Ayame&lt;/a>のスタンダードライセンスを買った。&lt;br>
+用途も決めずに買ったので、なにをするというわけでもないが、とりあえず触ってみようということでProxmoxにインストールすることにした。&lt;br>
+これはその時の手順メモ。&lt;/p>
+&lt;h2 id="-おことわり-">* おことわり *&lt;/h2>
+&lt;p>&lt;strong>ProxmoxはSEIL/x86 Ayameのサポート環境ではありません。&lt;/strong>&lt;/p>
+&lt;h2 id="インストール手順">インストール手順&lt;/h2>
+&lt;p>tl;dr : KVM仮想マシンイメージから起動する。&lt;/p>
+&lt;h3 id="イメージを落とす">イメージを落とす&lt;/h3>
+&lt;p>まずは&lt;a href="https://www.seil.jp/product/download.html#dl__x86ayame">公式のダウンロードページ&lt;/a>からイメージを落とす。&lt;/p>
+&lt;p>配布形式は&lt;/p>
+&lt;ul>
+&lt;li>KVM形式&lt;/li>
+&lt;li>VMware形式（OVF版を同梱）&lt;/li>
+&lt;li>Hyper-V形式&lt;/li>
+&lt;li>Microsoft Azure形式&lt;/li>
+&lt;li>Amazon AWS EC2形式&lt;/li>
+&lt;/ul>
+&lt;p>となっている。&lt;br>
+Proxmoxで扱うならISOがあるととても嬉しいが、ないので(ていうか性質的に無理な気がする)KVMイメージを使ってごにょごにょすることにした。&lt;/p>
+&lt;p>ダウンロードしたZIPを展開するとqcow2ファイルが出てくる。これを使う。&lt;/p>
+&lt;h3 id="空のvmを作成する">空のVMを作成する&lt;/h3>
+&lt;p>qcow2ファイルをGUIから扱うことはできないが、&lt;a href="https://forum.proxmox.com/threads/qcow2-to-proxmox.77894/">フォーラムを見るとProxmoxのシェルからなら取り扱えるらしい&lt;/a>。これに従う。&lt;br>
+まず普通にVMを作成するときと同じように設定したあと、&lt;code>ハードウェア&lt;/code> 設定からストレージを取り外せばOK。&lt;br>
+後の手順で使うので、作成したVM IDを控えておく(今回は100)。&lt;/p>
+&lt;h3 id="proxmoxにqcow2ファイルを転送する">Proxmoxにqcow2ファイルを転送する&lt;/h3>
+&lt;p>ISO形式だと管理画面からアップロードできるが、そうではないのでSCPなりUSBフラッシュメモリなりを使って転送する。&lt;br>
+今回は物理マシンがすぐそこにあったので、USBフラッシュメモリを使った。&lt;br>
+今回はProxmoxのシェルで下記のコマンドを使い、cqow2ファイルの入ったUSBフラッシュメモリを &lt;code>/mnt/external&lt;/code> にマウントした。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>% mkdir /mnt/external
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% mount /dev/sdb1 /mnt/external &lt;span style="color:#75715e"># デバイスは適宜読み替えること！&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="シェルからvmにイメージをインポートする">シェルからVMにイメージをインポートする&lt;/h3>
+&lt;p>Proxmoxの &lt;code>シェル&lt;/code> にアクセスできるユーザを使う。今回は横着してrootユーザを使った。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># qm importdisk {VM ID} {イメージの場所} local-lvm&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>% qm importdisk &lt;span style="color:#ae81ff">100&lt;/span> /mnt/external/seilx86.qcow2 local-lvm
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="ブート順を確認し起動する">ブート順を確認し、起動する&lt;/h3>
+&lt;p>VMの &lt;code>オプション&lt;/code> でブート順を確認し、インポートしたディスクがブートされるように設定したら起動する。&lt;br>
+(デフォルトの挙動がわかっていないが、もしディスクが無効化されていたら有効にする作業も必要。チェック入れるだけなはず)&lt;br>
+起動したら、ライセンスを入力すれば作業完了。&lt;/p>
+&lt;h2 id="起動">起動&lt;/h2>
+&lt;p>こんなかんじ。&lt;br>
+&lt;blockquote class="twitter-tweet">&lt;p lang="ja" dir="ltr">SEIL/x86 Ayame起動できた あそぶぞー &lt;a href="https://t.co/PEajdNjaQp">pic.twitter.com/PEajdNjaQp&lt;/a>&lt;/p>&amp;mdash; kei (@_kei_s) &lt;a href="https://twitter.com/_kei_s/status/1614470430919917568?ref_src=twsrc%5Etfw">January 15, 2023&lt;/a>&lt;/blockquote>
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+&lt;/p>
+&lt;h2 id="感想">感想&lt;/h2>
+&lt;p>すなおにESXiでやろう。&lt;br>
+SEILの使いみちはこれから考えます。&lt;/p></content></item><item><title>2023年 令和最新版 archlinux インストールオレオレ手順</title><link>/posts/install-archlinux-v2023/</link><pubDate>Sat, 14 Jan 2023 14:30:00 +0900</pubDate><guid>/posts/install-archlinux-v2023/</guid><description>これはなにか Windows 11が入っているマシンにarchlinuxを追加してデュアルブート設定までやったときのメモ。 最低限のツールを設定して、デスクトップ環境を立ち上げるところまでやっている。便利な開発系ツールのインストールやおしゃれ設定などはしていない。 将来的に自動化するときに楽できるように、細かくコマンドを書いておくという趣旨。 背景 年末年始に半額だったので、SEIL/x86 Ayameを衝動買いしたが、そ</description><content>&lt;h2 id="これはなにか">これはなにか&lt;/h2>
 &lt;p>Windows 11が入っているマシンにarchlinuxを追加してデュアルブート設定までやったときのメモ。&lt;br>
 最低限のツールを設定して、デスクトップ環境を立ち上げるところまでやっている。便利な開発系ツールのインストールやおしゃれ設定などはしていない。&lt;/p>
 &lt;p>&lt;a href="https://yakst.com/ja/posts/5564">将来的に自動化するときに楽できるように、細かくコマンドを書いておく&lt;/a>という趣旨。&lt;/p>
