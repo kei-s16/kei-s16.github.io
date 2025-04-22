@@ -28,7 +28,7 @@ jobs:
       - name: "ビルド"
         run: pnpm run build
       - name: "ファイルのコピー"
-        run: cp -r ./src/assets/data ./src/dist/data
+        run: cp -r ./src/assets/data ./src/dist/assets/data
 
       - name: "artifactに保存する"
         id: deployment
