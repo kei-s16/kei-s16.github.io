@@ -1,0 +1,51 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "checkoutする"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Node.jsのセットアップ"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.11.0
+      - name: "pnpmのセットアップ"
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: "パッケージのインストール"
+        run: pnpm install --frozen-lockfile
+      - name: "ビルド"
+        run: pnpm run build
+      - name: "ファイルのコピー"
+        run: cp -r ./src/assets/data ./src/dist/data
+
+      - name: "artifactに保存する"
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: src/dist/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: "GitHub Pagesにデプロイする"
+        id: deployment
+        uses: actions/deploy-pages@v4

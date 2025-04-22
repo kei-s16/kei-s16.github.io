@@ -1,0 +1,30 @@
+{
+  "links": [
+    {
+      "title": "GitHub",
+      "description": "GitHub",
+      "url": "https://github.com/kei-s16"
+    },
+    {
+      "title": "blog",
+      "description": "比較的ちゃんと書いてるブログ",
+      "url": "https://blog.k16em.net"
+    },
+    {
+      "title": "Twitter",
+      "description": "Twitter(恥)",
+      "url": "https://twitter.com/_kei_s"
+    },
+    {
+      "title": "Scrapbox",
+      "description": "雑多なメモ置き場",
+      "url": "https://scrapbox.io/k16em/"
+    },
+    {
+      "title": "Keybase",
+      "description": "Keybase",
+      "url": "https://keybase.io/k16em"
+    }
+  ]
+}
+
