@@ -19,7 +19,7 @@
             <h1 class="text-3xl font-bold underline">k16em.net</h1>
         </header>
         <section class="flex justify-center gap-2 p-4">
-            <div class="flex flex-col gap-x-4 p-6 flex-row items-center mx-auto flex max-w-sm items-center gap-x-4 rounded-xl bg-white p-6 shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
+            <div class="flex flex-col gap-x-4 p-6 flex-row items-center mx-auto flex max-w-sm items-center gap-x-4 rounded-xl bg-white p-6 shadow-lg outline outline-black/5">
                 <img class="mx-auto block h-24 rounded-full sm:mx-0 sm:shrink-0" src="/assets/images/icons/cat.jpg" alt="黒猫のアイコン" />
                 <div class="space-y-2 text-center sm:text-left">
                     <div class="space-y-0.5">
@@ -34,13 +34,13 @@
                 <div id="content"></div>
                 <script type="template" id="links">
                     {% for link in links %}
-                    <div class="mx-auto flex max-w-sm items-center gap-x-4 rounded-xl bg-white p-6 shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10 mt-2 mb-2">
+                    <div class="mx-auto flex max-w-sm items-center gap-x-4 rounded-xl bg-white p-6 shadow-lg outline outline-black/5 mt-2 mb-2">
                       <div class="size-12 shrink-0 p-3">
                         <span class="material-symbols-outlined">link</span>
                       </div>
                       <div>
-                        <div class="text-lg font-bold text-black dark:text-white"><a href="{{ link.url }}" target="_blank">{{ link.title }}</a></div>
-                        <p class="text-gray-500 dark:text-gray-400">{{ link.description }}</p>
+                        <div class="text-lg font-bold text-black"><a href="{{ link.url }}" target="_blank">{{ link.title }}</a></div>
+                        <p class="text-gray-500">{{ link.description }}</p>
                       </div>
                     </div>
                     {% endfor %}
