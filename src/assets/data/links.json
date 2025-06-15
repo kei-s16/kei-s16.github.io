@@ -31,6 +31,11 @@
       "url": "https://scrapbox.io/k16em/"
     },
     {
+      "title": "GPG公開鍵",
+      "description": "Keybaseが対応してない形式にしてしまったのでこれが正です",
+      "url": "https://github.com/kei-s16.gpg"
+    },
+    {
       "title": "Keybase",
       "description": "Keybase",
       "url": "https://keybase.io/k16em"
